@@ -1603,6 +1603,37 @@ PAR handles all technical requirements. Expand below for the full Tier 4 math, q
     sectionKeys: ['ALTRIA TIER 4', 'ALTRIA (AGDC)', 'REIMBURSEMENT']
   },
   {
+    detect: q => ['different','differenti','better','advantage','why par','compare','vs ','versus','legacy','switch','competitor','why not','why choose','what sets','value prop','benefit'].some(w => q.includes(w)),
+    intro: `PAR Retail stands apart from legacy scan data providers on **six key dimensions**:
+
+**1. Higher pass-through rate** — PAR passes through **95%+** of manufacturer reimbursements vs. ~80% industry average. That gap is roughly **$2,300/store/year** in additional cash at a typical chain, and it compounds across every store, every week.
+
+**2. Pre-submission error correction** — PAR catches and fixes file errors *before* they reach Circana or AGDC. With legacy providers, a rejected file means that week's reimbursement is simply gone — manufacturers don't offer second chances.
+
+**3. Loyalty platform integration** — PAR's native loyalty platform (Activate) drives a **38% loyalty take rate** vs. 18% industry average — more than doubling the loyalty-driven reimbursement component because offers are better-targeted and enrollment is frictionless.
+
+**4. All manufacturers, one platform** — Altria + RJR + MSA + PMI + Juul from a single connection. Legacy providers often cover only one or two programs, leaving revenue on the table.
+
+**5. Historical resubmission** — When a retailer switches to PAR, we resubmit up to **52 weeks of historical data** to recover missed rebates from the prior provider. Legacy providers won't do this for an outgoing client.
+
+**6. End-to-end platform** — Loyalty host (Activate) + scan data pipeline + manufacturer APIs (Altria P+, RJR JBF) in one system. Point solutions that are loyalty-only or scan-data-only can't fuse the data accurately, which degrades both submission quality and loyalty attribution.`,
+    sectionKeys: ['PAR RETAIL COMPETITIVE', 'REIMBURSEMENT', 'RESUBMISSION', 'ALTRIA TIER 4', 'ONBOARDING']
+  },
+  {
+    detect: q => ['what is scan data','what is a scan','what does scan data','explain scan data','how does scan data work','how scan data','scan data work','scan data mean','what scan data'].some(w => q.includes(w)),
+    intro: `**Scan data** is a once-weekly transactional feed sent to tobacco manufacturers that proves a specific sale occurred at a specific price to a specific customer — it's effectively the "receipt" that triggers manufacturer-funded rebates and incentive payments.
+
+**Without scan data, there is no rebate check.** Manufacturers only reimburse retailers for promotional discounts they can verify actually happened at the register.
+
+**Three things every scan data file must prove:**
+1. **Purchases** — What was sold: UPC, quantity, timestamp, store, final price
+2. **Discounts** — Was a manufacturer-approved promotion applied at the register (multi-unit or loyalty offer)?
+3. **Loyalty participation** — Did the customer provide an ID (phone number) to access manufacturer offers?
+
+**Who gets paid:** The manufacturer funds the discount (e.g., "buy 2 packs, save $1"). The retailer fronts the discount at the register, then submits scan data to get reimbursed — typically within 30–60 days. The scan data provider (PAR) handles all the file generation, formatting, and submission automatically every week.`,
+    sectionKeys: ['WHAT IS SCAN', 'REIMBURSEMENT', 'MANUFACTURERS', 'ONBOARDING']
+  },
+  {
     detect: q => ['resubmit','resubmission','historical','back data','prior','missed week','recover','switchover','switch over','old provider'].some(w => q.includes(w)),
     intro: `PAR Retail can resubmit up to **52 weeks of historical scan data** — this is a critical differentiator when switching from a legacy provider.
 
