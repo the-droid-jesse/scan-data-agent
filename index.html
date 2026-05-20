@@ -1492,16 +1492,15 @@ function kbGetFollowups(title) {
   return ['How does PAR Retail compare to legacy providers?','What is the Altria Tier 4 program?','How long does onboarding typically take?'];
 }
 
-function kbSummary(content, maxLines) {
-  // Pull first N meaningful lines, skipping Keywords lines, blank lines, and dividers
-  const out = [];
+function kbFirstLine(content) {
+  // Return the first meaningful sentence/phrase from a section (for summary bullets)
   for (const line of content.split('\n')) {
-    if (out.length >= maxLines) break;
     const t = line.trim();
-    if (!t || t === '---' || t.startsWith('Keywords:')) continue;
-    out.push(t);
+    if (!t || t === '---' || t.startsWith('Keywords:') || t.startsWith('#')) continue;
+    // Strip leading list markers and bold markers, cap at 130 chars
+    return t.replace(/^\*\*(.+?)\*\*[:\s—–-]*/, '$1 — ').replace(/^[-*]\s+/, '').slice(0, 130);
   }
-  return out.join('\n');
+  return '';
 }
 
 function kbQuery(query) {
@@ -1519,8 +1518,12 @@ function kbQuery(query) {
   const minScore = Math.max(2, top.score * 0.35);
   const competitive = scored.filter(s => s.score >= minScore).slice(0, 6);
 
-  // Summary: title + first 6 meaningful lines from top section
-  const summaryHtml = renderMd(`**${top.title}**\n\n${kbSummary(top.content, 6)}`);
+  // Summary: always a general overview — one bullet per matched topic
+  const label = competitive.length > 1
+    ? `**${competitive.length} relevant topics found** — click any section below to expand the full detail:`
+    : `**${top.title}** — overview:`;
+  const bullets = competitive.map(s => `- **${s.title}**: ${kbFirstLine(s.content)}`).join('\n');
+  const summaryHtml = renderMd(`${label}\n\n${bullets}`);
 
   // Expandable detail blocks — one per competitive section
   const detailsHtml = '<div class="kb-details">' +
