@@ -1620,7 +1620,7 @@ PAR handles all technical requirements. Expand below for the full Tier 4 math, q
     sectionKeys: ['PAR RETAIL COMPETITIVE', 'REIMBURSEMENT', 'RESUBMISSION', 'ALTRIA TIER 4', 'ONBOARDING']
   },
   {
-    detect: q => ['pos system','point of sale','verifone','gilbarco','passport','ncr','commander','tote','what system','which system','supported system','compatible','pos support','work with','integrate'].some(w => q.includes(w)),
+    detect: q => ['pos system','point of sale','verifone','gilbarco','passport','ncr radiant','commander','tote.ai','what system','which system','supported system','what pos','which pos','compatible','pos support','work with pos','integrate'].some(w => q.includes(w)) || (q.includes('pos') && ['support','work','compatible','use','system'].some(w => q.includes(w))),
     intro: `PAR Retail supports all major c-store POS systems for scan data ingestion. Here's what's confirmed compatible:
 
 | POS System | Minimum Version |
