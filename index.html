@@ -1717,7 +1717,7 @@ function addTyping() {
 }
 function removeTyping(id) { const el = document.getElementById(id); if (el) el.remove(); }
 
-function addMessage(role, text, fus = []) {
+function addMessage(role, payload, fus = []) {
   const c  = document.getElementById('messages');
   const d  = document.createElement('div');
   const isUser = role === 'user';
@@ -1726,11 +1726,13 @@ function addMessage(role, text, fus = []) {
   const av = isUser
     ? `<div class="avatar user-av">You</div>`
     : `<div class="avatar ai" style="${isKb?'background:rgba(140,159,255,.18);color:var(--par-2);border:1px solid var(--par-2)':''}">SD</div>`;
-  const body    = !isUser ? renderMd(text) : esc(text);
+  // KB responses carry pre-built HTML; AI/user responses are plain text
+  const body = isUser ? esc(payload) : (isKb ? payload.html : renderMd(payload));
   const badge   = isKb ? `<span style="font-size:.58rem;font-weight:700;letter-spacing:.05em;color:var(--par-2);background:rgba(140,159,255,.12);border:1px solid rgba(140,159,255,.3);border-radius:3px;padding:1px 6px;margin-bottom:6px;display:inline-block;">📚 KNOWLEDGE BASE</span><br>` : '';
   const copyBtn = !isUser ? `<button class="copy-btn" onclick="copyText(this)">Copy</button>` : '';
+  const fuList  = (fus && fus.length) ? fus : [];
   let fuHtml = '';
-  if (fus.length) fuHtml = `<div class="followups"><div class="fu-label">You might also ask:</div>${fus.map(q=>`<button class="fu-chip" onclick="ask(${JSON.stringify(q)})">${esc(q)}</button>`).join('')}</div>`;
+  if (fuList.length) fuHtml = `<div class="followups"><div class="fu-label">You might also ask:</div>${fuList.map(q=>`<button class="fu-chip" onclick="ask(${JSON.stringify(q)})">${esc(q)}</button>`).join('')}</div>`;
   const bubbleCls = isUser ? 'bubble user' : 'bubble ai';
   const bubbleStyle = isKb ? 'border-color:rgba(140,159,255,.2)' : '';
   d.innerHTML = `${av}<div class="${bubbleCls}"${bubbleStyle?' style="'+bubbleStyle+'"':''}>${copyBtn}${badge}${body}${fuHtml}</div>`;
