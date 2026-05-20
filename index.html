@@ -1721,13 +1721,27 @@ function kbQuery(query) {
     }
   }
 
-  // ── Fallback: scored bullet summary ──────────────────────────────────────────
+  // ── Fallback: direct answer for focused queries, bullet list for broad ones ───
   const minScore = Math.max(2, top.score * 0.35);
   const competitive = scored.filter(s => s.score >= minScore).slice(0, 6);
-  const intro = kbBuildIntro(query, competitive);
-  const bullets = competitive.map(s => `- **${s.title}**: ${kbGetSummary(s.content)}`).join('\n');
+
+  let summaryHtml;
+  if (competitive.length <= 2) {
+    // Focused question — answer directly from the top section's summary
+    const topSummary = kbGetSummary(top.content);
+    const secondNote = competitive[1]
+      ? `\n\nAlso relevant: **${competitive[1].title}** — ${kbGetSummary(competitive[1].content)}`
+      : '';
+    summaryHtml = renderMd(`**${top.title}**\n\n${topSummary}${secondNote}`);
+  } else {
+    // Broad question — bullet overview of all matched sections
+    const intro = kbBuildIntro(query, competitive);
+    const bullets = competitive.map(s => `- **${s.title}**: ${kbGetSummary(s.content)}`).join('\n');
+    summaryHtml = renderMd(`${intro}\n\n${bullets}`);
+  }
+
   return {
-    html: renderMd(`${intro}\n\n${bullets}`) + buildDetailBlocks(competitive),
+    html: summaryHtml + buildDetailBlocks(competitive),
     fus: kbGetFollowups(top.title)
   };
 }
