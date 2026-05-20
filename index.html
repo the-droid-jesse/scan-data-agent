@@ -1649,8 +1649,8 @@ async function sendMessage() {
     const tid = addTyping();
     await new Promise(r => setTimeout(r, 200)); // tiny delay for UX feel
     removeTyping(tid);
-    const { text: answer, fus } = kbQuery(text);
-    addMessage('kb', answer, fus);
+    const kbResult = kbQuery(text);
+    addMessage('kb', kbResult, kbResult.fus);
     setLoading(false);
     return;
   }
