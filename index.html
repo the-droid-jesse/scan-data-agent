@@ -1476,9 +1476,26 @@ function kbQuery(query) {
     };
   }
   const top = scored[0];
-  const second = scored[1] && scored[1].score >= Math.max(2, top.score * 0.5) ? scored[1] : null;
-  let text = `**${top.title}**\n\n${top.content}`;
-  if (second) text += `\n\n---\n\n**Also relevant — ${second.title}**\n\n${second.content}`;
+
+  // Multi-vendor detection: 3+ sections score competitively → surface all of them
+  const minScore = Math.max(2, top.score * 0.35);
+  const competitive = scored.filter(s => s.score >= minScore);
+
+  let text;
+  if (competitive.length >= 3) {
+    // Show first section in full; subsequent sections get a 30-line preview each
+    text = competitive.slice(0, 6).map((s, i) => {
+      const hdr = i === 0 ? `**${s.title}**` : `---\n\n**${s.title}**`;
+      const lines = s.content.split('\n');
+      const body = i === 0 ? s.content : lines.slice(0, 30).join('\n') + (lines.length > 30 ? '\n\n*…(ask me specifically about this program for the full detail)*' : '');
+      return `${hdr}\n\n${body}`;
+    }).join('\n\n');
+  } else {
+    const second = scored[1] && scored[1].score >= Math.max(2, top.score * 0.5) ? scored[1] : null;
+    text = `**${top.title}**\n\n${top.content}`;
+    if (second) text += `\n\n---\n\n**Also relevant — ${second.title}**\n\n${second.content}`;
+  }
+
   return { text, fus: kbGetFollowups(top.title) };
 }
 
