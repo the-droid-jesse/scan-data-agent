@@ -1534,6 +1534,28 @@ function kbGetFollowups(title) {
 
 // ─── Pre-written synthesized overviews for common question intents ────────────
 const KB_OVERVIEWS = [
+  // ── POS systems — must come first; "support" in query would otherwise match vendor overview ──
+  {
+    detect: q => (q.includes('pos') && ['support','work','compatible','use','system','run'].some(w => q.includes(w))) || ['verifone','gilbarco','passport','ncr radiant','commander','tote.ai','what pos','which pos','pos system','point of sale','supported system'].some(w => q.includes(w)),
+    intro: `PAR Retail supports all major c-store POS systems for scan data ingestion. Here's what's confirmed compatible:
+
+| POS System | Minimum Version |
+|---|---|
+| Verifone Commander | Base v53+ |
+| Gilbarco Passport | v20+ |
+| NCR Radiant | v1.6.3+ |
+| Tote.ai | Supported (special NAXML handling) |
+| GK (Generic Kernel) | Supported |
+
+**How PAR connects to a POS:** PAR ingests compressed XML TLog files in **NAXML or MAXML format** delivered via SFTP. Most major c-store POS systems support this natively. Retailers without direct SFTP capability (smaller dealers, jobber networks) can use **Axonet** as an alternative connectivity option.
+
+**Key POS configuration requirement:** PSPC codes **410–419** must be assigned to tobacco loyalty items in the POS price book. On Gilbarco Passport specifically, this must be set in the *local* PLU — not the back-office system. This is the most common cause of onboarding delays.
+
+**TLog delivery SLA:** TLog files must arrive at PAR's SFTP within **3 calendar days** of the transaction date to be included in that week's submission.
+
+If the retailer is on a POS system not listed here, PAR's technical team evaluates compatibility on a case-by-case basis — most modern c-store systems with NAXML export can be supported.`,
+    sectionKeys: ['MINIMUM TECHNICAL', 'TECHNICAL ARCH', 'ONBOARDING', 'COMMON ERRORS']
+  },
   {
     detect: q => ['onboard','timeline','how long','weeks','when live','start up','get started','setup','begin','enroll','phase','step by step','process'].some(w => q.includes(w)),
     intro: `Onboarding with PAR Retail typically takes **4–8 weeks** from kickoff to live production. The main variables are POS readiness, how quickly the retailer signs manufacturer agreements, and which programs are being activated (PMI SFPP adds its own 6-week validation period on top of that).
