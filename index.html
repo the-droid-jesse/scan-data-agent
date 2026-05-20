@@ -157,23 +157,25 @@ header::after {
   border-top-left-radius: 2px;
 }
 .bubble.user {
-  background: var(--par-0); border: 1px solid var(--brd-l);
-  border-top-right-radius: 2px;
+  background: var(--par-1); border: 1px solid var(--par-1);
+  border-top-right-radius: 2px; color: #fff;
 }
-.bubble strong { color: var(--par-2); }
+.bubble.user strong { color: rgba(255,255,255,.9); }
+.bubble.user em { color: rgba(255,255,255,.7); }
+.bubble strong { color: var(--par-3); }
 .bubble em { color: var(--txt-d); font-style: italic; }
 .bubble code {
-  background: rgba(140,159,255,.12); border: 1px solid rgba(140,159,255,.25);
-  border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: .75rem; color: var(--par-2);
+  background: rgba(92,107,192,.1); border: 1px solid rgba(92,107,192,.25);
+  border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: .75rem; color: var(--par-3);
 }
 .bubble ul, .bubble ol { padding-left: 16px; margin: 5px 0; }
 .bubble li { margin: 3px 0; }
-.bubble h3 { font-size: .82rem; font-weight: 800; color: var(--par-2); margin: 8px 0 4px; }
+.bubble h3 { font-size: .82rem; font-weight: 800; color: var(--par-3); margin: 8px 0 4px; }
 .bubble h4 { font-size: .72rem; font-weight: 700; color: var(--txt-m); margin: 6px 0 3px; text-transform: uppercase; letter-spacing: .06em; }
 .bubble table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .75rem; }
-.bubble th { background: rgba(140,159,255,.1); padding: 5px 8px; text-align: left; font-weight: 700; border: 1px solid var(--brd); }
+.bubble th { background: rgba(92,107,192,.08); padding: 5px 8px; text-align: left; font-weight: 700; border: 1px solid var(--brd); }
 .bubble td { padding: 4px 8px; border: 1px solid var(--brd); }
-.bubble tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+.bubble tr:nth-child(even) td { background: rgba(0,0,0,.02); }
 .bubble p { margin: 5px 0; }
 .bubble p:first-child { margin-top: 0; }
 .bubble p:last-child { margin-bottom: 0; }
