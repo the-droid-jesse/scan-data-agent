@@ -199,6 +199,29 @@ header::after {
 }
 .fu-chip:hover { background: var(--par-1); border-color: var(--par-2); color: #fff; }
 
+/* ── KB expand/collapse detail blocks ── */
+.kb-details { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+.kb-expand { border: 1px solid var(--brd); border-radius: var(--rs); overflow: hidden; }
+.kb-expand > summary {
+  padding: 7px 11px; cursor: pointer; font-size: .72rem; font-weight: 700;
+  color: var(--par-2); background: var(--bg-surf); user-select: none;
+  display: flex; align-items: center; gap: 7px; list-style: none;
+}
+.kb-expand > summary::-webkit-details-marker { display: none; }
+.kb-expand > summary::before { content: '▶'; font-size: .58rem; transition: transform .15s; display: inline-block; }
+.kb-expand[open] > summary::before { transform: rotate(90deg); }
+.kb-expand-body { padding: 10px 13px; font-size: .78rem; line-height: 1.65; border-top: 1px solid var(--brd); background: var(--bg-card-h); }
+.kb-expand-body p { margin: 4px 0; }
+.kb-expand-body strong { color: var(--par-3); }
+.kb-expand-body code { background: rgba(92,107,192,.1); border: 1px solid rgba(92,107,192,.25); border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: .73rem; color: var(--par-3); }
+.kb-expand-body table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: .73rem; }
+.kb-expand-body th { background: rgba(92,107,192,.08); padding: 4px 7px; text-align: left; font-weight: 700; border: 1px solid var(--brd); }
+.kb-expand-body td { padding: 3px 7px; border: 1px solid var(--brd); }
+.kb-expand-body ul, .kb-expand-body ol { padding-left: 16px; margin: 4px 0; }
+.kb-expand-body li { margin: 2px 0; }
+.kb-expand-body h3 { font-size: .8rem; font-weight: 800; color: var(--par-3); margin: 8px 0 4px; }
+.kb-expand-body h4 { font-size: .7rem; font-weight: 700; color: var(--txt-m); margin: 6px 0 3px; text-transform: uppercase; letter-spacing: .06em; }
+
 .typing { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
 .typing span { width: 5px; height: 5px; background: var(--brd-l); border-radius: 50%; animation: tbounce .9s infinite; }
 .typing span:nth-child(2) { animation-delay: .15s; }
