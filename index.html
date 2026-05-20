@@ -462,6 +462,18 @@ input[type=range]::-webkit-slider-thumb {
 </head>
 <body>
 
+<!-- ── Password Gate ── -->
+<div id="pw-screen">
+  <div class="pw-card">
+    <img src="https://partech.com/wp-content/uploads/2025/11/par-logo.svg" alt="PAR">
+    <h2>Scan Data Sales Agent</h2>
+    <p>This tool is for PAR Retail internal use.<br>Enter the access password to continue.</p>
+    <input class="pw-input" type="password" id="pw-input" placeholder="Password" autocomplete="off" />
+    <button class="pw-btn" onclick="checkPassword()">Access Tool →</button>
+    <div class="pw-error" id="pw-error"></div>
+  </div>
+</div>
+
 <!-- ── Header ── -->
 <header>
   <img src="https://partech.com/wp-content/uploads/2025/11/par-logo.svg" alt="PAR" class="logo-img">
