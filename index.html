@@ -849,13 +849,13 @@ Keywords: Altria AGDC call contact phone help desk submission deadline cap resub
 
 **File Format — AGDC is completely different from RJR/PMI:**
 - **45 fields** (31 required + 14 optional) — proprietary format, not Circana RSS
-- Pipe-delimited (`|`), may be zipped (.zip)
-- **Summary line REQUIRED as the very first line:** `[Row Count]|[Sum Qty]|[Sum Final Sales Price]|[Scan Data Provider Name]` — Example: `28981|36294|483354.32|PARRetail`
+- Pipe-delimited (\`|\`), may be zipped (.zip)
+- **Summary line REQUIRED as the very first line:** \`[Row Count]|[Sum Qty]|[Sum Final Sales Price]|[Scan Data Provider Name]\` — Example: \`28981|36294|483354.32|PARRetail\`
 - **Consumer Units field (Field 19):** Reports individual units per UOM (e.g., 10 for carton). Not present in Circana format.
 - Transaction Time (Field 4): HH:MM:SS 24-hour required. Must never be 00:00:00 unless exactly midnight.
 - CBD products must NEVER be included — inclusion risks loss of promotional fund payments for the entire month.
 
-**File Naming:** `[AccountOrChainName][YYYYMMDD]` — date is week ending Saturday. Example: `Delek20260301.txt`
+**File Naming:** \`[AccountOrChainName][YYYYMMDD]\` — date is week ending Saturday. Example: \`Delek20260301.txt\`
 
 **Submission Deadline:** Every **Wednesday by 5:00 PM EST** (some internal references note Tuesday for STARS Week; use Wednesday as the hard internal SLA).
 
@@ -863,7 +863,7 @@ Keywords: Altria AGDC call contact phone help desk submission deadline cap resub
 
 **Submission Cap:** CRITICAL — total weekly files submitted in a Promotion Period must not exceed **2x the number of weeks** in that period. Exceeding the cap forfeits the base incentive for the entire period. Historical resubmissions count toward the period in which they are submitted, not their original week.
 
-**Resubmission filename:** Add version suffix — `Delek20241026v2.txt`.
+**Resubmission filename:** Add version suffix — \`Delek20241026v2.txt\`.
 
 **LFP (Loyalty Fund Program) Reporting — required for P+ and Everyday Value:**
 - Report LFP Promotion Code in Field 29 — exact codes found on AGDCNow.com each promotion period. No extra characters, periods, or dashes.
@@ -897,11 +897,11 @@ Keywords: RJR Circana stages onboarding enrollment testing certification product
 - **No summary line required** (unlike Altria AGDC)
 - Compression: .zip or .gz acceptable
 
-**File Naming:** `[SubmitterID]_[YYYYMMDD]_[HH24MM]_[FilePrefix].[ext]`
+**File Naming:** \`[SubmitterID]_[YYYYMMDD]_[HH24MM]_[FilePrefix].[ext]\`
 - SubmitterID = RMSC Account Number (provided in Circana Welcome Email)
 - FilePrefix = retailer name as in Welcome Email, no spaces/special characters
-- Example: `B42916_20251116_0000_EGRetailAmericaLLC.txt`
-- **Resubmission:** Same filename (overwrites). Only alter the time component if needed. Example: `823720_20241120_0001_SOUTHWESTCONVHQ.txt`
+- Example: \`B42916_20251116_0000_EGRetailAmericaLLC.txt\`
+- **Resubmission:** Same filename (overwrites). Only alter the time component if needed. Example: \`823720_20241120_0001_SOUTHWESTCONVHQ.txt\`
 
 **Submission Deadline:** Every **Wednesday by 5:00 PM EST**
 
@@ -909,7 +909,7 @@ Keywords: RJR Circana stages onboarding enrollment testing certification product
 
 **Circana Onboarding — 4 Stages:**
 1. **Enrollment** — Retailer enrolled, sFTP credentials provided. PAR gets sFTP access.
-2. **Testing** — PAR submits test files to `/Onboarding_Validation/` folder. Circana checks formatting. Resubmit corrections.
+2. **Testing** — PAR submits test files to \`/Onboarding_Validation/\` folder. Circana checks formatting. Resubmit corrections.
 3. **Certification** — PAR submits at least **2 consecutive weeks** of production-format data. Circana detailed review.
 4. **Production** — Circana notifies to move to Production folder. Live submissions begin.
 
@@ -937,18 +937,18 @@ Keywords: RJR Circana stages onboarding enrollment testing certification product
 - **34 fields** — same field names as Circana RSS
 - Pipe, Comma, or **JSON** formats supported (JSON option unique to MSA)
 - **.zip NOT accepted** — this is the #1 operational difference from Circana
-- Timestamp format: **Field 8 must be `yyyy-mm-dd-hh:mm:ss`** (military time). Example: `2023-03-15-14:32:07`. Not required by Circana.
+- Timestamp format: **Field 8 must be \`yyyy-mm-dd-hh:mm:ss\`** (military time). Example: \`2023-03-15-14:32:07\`. Not required by Circana.
 - Empty fields must be completely blank — no spaces between delimiters
 
 **Transaction Identity Key (MSA explicitly defines this, Circana does not):**
 The unique combination identifying each record: Transaction Date/Time (F8) + Market Basket ID (F9) + Scan ID (F10) + Register ID (F11) + Outlet Number (F2)
 
 **File Naming:** Coordinate with your MSA program representative at setup.
-**Resubmission filename:** Add `_RESUB` suffix. Example: `Delek20241027_RESUB.txt`
+**Resubmission filename:** Add \`_RESUB\` suffix. Example: \`Delek20241027_RESUB.txt\`
 
 **Submission Deadline:** Every Wednesday by 5:00 PM EST (Mon–Sun data window same as RJR)
 
-**MSA Test folder:** `/<customer_prefix>xfer_test/incoming/` — add `_TEST` to filename before `.txt`
+**MSA Test folder:** \`/<customer_prefix>xfer_test/incoming/\` — add \`_TEST\` to filename before \`.txt\`
 
 ---
 
@@ -964,7 +964,7 @@ The unique combination identifying each record: Transaction Date/Time (F8) + Mar
 
 **File Format:** Identical 34-field Circana RSS schema as RJR. Same pipeline output, different sFTP credentials and destination.
 
-**File Naming:** Same Circana format as RJR: `[SubmitterID]_[YYYYMMDD]_[HH24MM]_[FilePrefix].[ext]`
+**File Naming:** Same Circana format as RJR: \`[SubmitterID]_[YYYYMMDD]_[HH24MM]_[FilePrefix].[ext]\`
 
 **Onboarding — 4 Stages with HIGHER BAR than RJR:**
 1. Enrollment → Testing → Certification (2 consecutive weeks) → **Validation (6 consecutive weeks)**
@@ -1058,7 +1058,7 @@ Keywords: POS switch change system NCR GK Gilbarco Verifone merchandise codes ma
 **How PAR Retail processes scan data:**
 1. **Ingestion:** ETL cron job triggers RabbitMQ messages every 24 hours. Downloads compressed XML TLogs (NAXML/MAXML format) from retailer or PAR SFTP.
 2. **Raw storage:** Files stored in AWS S3 for safekeeping and reprocessing capability.
-3. **Normalization:** Parse XML → JSON, map to DTOs, store in database. Non-normalized fields preserved in raw `element_data` JSON column for traceability.
+3. **Normalization:** Parse XML → JSON, map to DTOs, store in database. Non-normalized fields preserved in raw \`element_data\` JSON column for traceability.
 4. **Report Generation:** Runs Tuesday night for prior week. 1M+ rows for large retailers (EG America, Chevron EMCS); 5–6 hour automated jobs, CPU/memory intensive.
 5. **Manufacturer submission:** Encrypted scan data files uploaded to manufacturer sFTP on weekly cadence.
 
@@ -1173,9 +1173,9 @@ Axonet connectivity option: For smaller dealer and jobber sites without direct S
 **Resubmission filename conventions by CPG:**
 | CPG | Original | Resubmission |
 |---|---|---|
-| Altria | `Delek20241026.txt` | `Delek20241026v2.txt` (add version suffix) |
-| RJR (Circana) | `823720_20241120_0000_SOUTHWESTCONVHQ.txt` | Same filename (overwrites). Only alter time if truly needed. |
-| MSA | `Delek20241027.txt` | `Delek20241027_RESUB.txt` (add _RESUB suffix) |
+| Altria | \`Delek20241026.txt\` | \`Delek20241026v2.txt\` (add version suffix) |
+| RJR (Circana) | \`823720_20241120_0000_SOUTHWESTCONVHQ.txt\` | Same filename (overwrites). Only alter time if truly needed. |
+| MSA | \`Delek20241027.txt\` | \`Delek20241027_RESUB.txt\` (add _RESUB suffix) |
 
 **Important:** Resubmission acceptance is at the manufacturer's discretion. PAR advocates on your behalf but cannot guarantee out-of-window acceptance. Root cause must be fixed before resubmission.
 
@@ -1199,9 +1199,9 @@ Keywords: weekly submission deadline schedule cadence when submit submission dea
 - **RJR (Circana):** Monday 00:00:01 → Sunday 23:59:59
 
 **Test/Onboarding SFTP folders:**
-- Altria AGDC: `/incoming/qa/`
-- Circana (RJR/PMI): `/Onboarding_Validation/`
-- MSA: `/<customer_prefix>xfer_test/incoming/` (add `_TEST` to filename)
+- Altria AGDC: \`/incoming/qa/\`
+- Circana (RJR/PMI): \`/Onboarding_Validation/\`
+- MSA: \`/<customer_prefix>xfer_test/incoming/\` (add \`_TEST\` to filename)
 
 ---
 
@@ -1240,8 +1240,8 @@ When an offer is funded by both an **RJR Promotion Code** and a **JBF (Joint Bus
 **External ID Format:**
 | Funding Type | External ID Format | Example |
 |---|---|---|
-| RJR only | RJR Promotion Code alone | `40201` |
-| RJR + JBF | RJR Code + space + JBF tag | `40201 JBF` |
+| RJR only | RJR Promotion Code alone | \`40201\` |
+| RJR + JBF | RJR Code + space + JBF tag | \`40201 JBF\` |
 
 **Rules:**
 - Separator must be a **single space** — no commas, slashes, or other characters
@@ -1293,9 +1293,9 @@ When an offer is funded by both an **RJR Promotion Code** and a **JBF (Joint Bus
 **Other customers:** Jacksons, Dash In, H&S Energy, Stinker, DK/Oxxo, Caseys (onboarding), Gulf, Bolla, Circle K.
 
 **File name examples:**
-- Altria: `ExtraMileConvenienceStoresLLC20241123.txt`
-- Circana: `B40269_20241120_1200_ExtraMileConvenience.txt`
-- MSA: `M000967_20241120_0000_ExtraMile.txt`
+- Altria: \`ExtraMileConvenienceStoresLLC20241123.txt\`
+- Circana: \`B40269_20241120_1200_ExtraMileConvenience.txt\`
+- MSA: \`M000967_20241120_0000_ExtraMile.txt\`
 
 ---
 
