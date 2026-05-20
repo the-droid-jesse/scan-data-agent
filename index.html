@@ -1532,6 +1532,101 @@ function kbGetFollowups(title) {
   return ['How does PAR Retail compare to legacy providers?','What is the Altria Tier 4 program?','How long does onboarding typically take?'];
 }
 
+// ─── Pre-written synthesized overviews for common question intents ────────────
+const KB_OVERVIEWS = [
+  {
+    detect: q => ['onboard','timeline','how long','weeks','when live','start up','get started','setup','begin','enroll','phase','step by step','process'].some(w => q.includes(w)),
+    intro: `Onboarding with PAR Retail typically takes **4–8 weeks** from kickoff to live production. The main variables are POS readiness, how quickly the retailer signs manufacturer agreements, and which programs are being activated (PMI SFPP adds its own 6-week validation period on top of that).
+
+**General onboarding flow:**
+1. **Phase 1 — Agreements & discovery** *(Week 1–2)*: Retailer signs manufacturer agreements (Altria, RJR, etc.); PAR gets SFTP or Axonet access to POS TLogs.
+2. **Phase 2 — Technical setup** *(Week 2–4)*: PAR configures the ETL pipeline, maps merchandise codes to UPCs, and ingests test TLogs for validation.
+3. **Phase 3 — Testing & certification** *(Week 3–6)*: Test files submitted to brokers. Circana (RJR) requires 2 certified weeks; PMI SFPP requires 6 consecutive validated weeks.
+4. **Phase 4 — Production** *(Week 5–8+)*: First live submission, monitoring begins, and any resubmissions are handled to cover the switchover period.
+
+Expand the sections below for manufacturer-specific onboarding requirements and timing.`,
+    sectionKeys: ['ONBOARDING', 'RJR', 'PMI', 'ALTRIA', 'MINIMUM TECHNICAL', 'TECHNICAL ARCH']
+  },
+  {
+    detect: q => ['what vendor','which vendor','what manufacturer','which manufacturer','what program','which program','compare','all program','all manufacturer','support','offering','scan data program','what scan'].some(w => q.includes(w)),
+    intro: `PAR Retail handles scan data for **all major tobacco manufacturers** from a single platform — no need for separate providers or connections:
+
+- **Altria / AGDC** — Digital Trade Program (DTP); proprietary 45-field format; highest-value program for most c-store retailers
+- **Reynolds / RJR** via Circana — RMSC Retail Scan Data Program; standard 34-field RSS format; most widely deployed
+- **PMI** via Circana — Smoke-Free Performance Program (IQOS, reduced-risk/nicotine products); same Circana format as RJR
+- **Liggett / Vector Group** via MSA — RSS format; key operational rule: **.zip files NOT accepted** (only .gz or plain text)
+- **Juul** — Direct submission to Juul Labs; no third-party broker; most flexible process
+
+All programs share a **Wednesday 5PM EST** submission deadline (Altria follows the STARS week calendar). Expand each section below for full specs, file formats, and broker contacts.`,
+    sectionKeys: ['MANUFACTURERS', 'ALTRIA (AGDC)', 'RJR (CIRCANA)', 'MSA SCAN', 'PMI (SFPP)', 'JUUL SCAN']
+  },
+  {
+    detect: q => ['reimburse','payout','how much','earn','revenue','money','worth','cost','pass-through','pass through','rate','dollar','annual','per store','per week'].some(w => q.includes(w)),
+    intro: `Scan data reimbursements come directly from tobacco manufacturers and flow through PAR Retail to the retailer. The key metric is **pass-through rate** — how much of what the manufacturer pays actually reaches the retailer:
+
+- **PAR Retail**: 95%+ pass-through rate
+- **Industry average**: ~80% pass-through rate
+- **Gap**: roughly **$2,300/store/year** in additional cash at a typical 30-store chain
+
+A retailer with 30 stores typically earns **$2,000–5,000/store/year** across all active programs (Altria + RJR + MSA combined). Loyalty participation is the biggest multiplier — PAR's 38% loyalty take rate vs. the 18% industry average roughly doubles the loyalty-driven payout component.
+
+Altria Tier 4 adds an additional layer of incentives (DAF, DSF, LFP) on top of base reimbursements. Expand below for detailed math, benchmarks, and Tier 4 calculations.`,
+    sectionKeys: ['REIMBURSEMENT', 'ALTRIA TIER 4', 'WHAT IS SCAN', 'PAR RETAIL COMPETITIVE']
+  },
+  {
+    detect: q => ['error','reject','fail','issue','fix','problem','wrong','missing','not working','not submit','why not','declined','invalid','denied'].some(w => q.includes(w)),
+    intro: `Scan data rejections fall into **four categories** — each routes to a different team:
+
+1. **File formatting error** → Data broker (Circana, MSA, or AGDC Help Desk). PAR handles these — they are our responsibility to fix and resubmit.
+2. **Store not enrolled** → Manufacturer. The retailer's location may not have an active program agreement — PAR escalates on the retailer's behalf.
+3. **UPC not in program** → Manufacturer. The specific product SKU may not be eligible for rebates under the current program period.
+4. **Missing election / PSPC config** → POS fix. The POS is not sending the required tobacco loyalty identifier code (PSPC 410 or 419).
+
+PAR's support team handles triage and routing — the retailer doesn't need to know which path to take. Expand below for the full error cheat sheet, escalation contacts, and common fix steps.`,
+    sectionKeys: ['COMMON ERRORS', 'MINIMUM TECHNICAL', 'TECHNICAL ARCH', 'RESUBMISSION']
+  },
+  {
+    detect: q => ['tier 4','tier4','daf','dsf','lfp','p+','personali','ddm','eaiv','accelerator','store fund','loyalty fund'].some(w => q.includes(w)),
+    intro: `Altria **Tier 4** is the highest certification level in the Altria program and unlocks three premium funding pools on top of the base transaction incentive:
+
+- **DSF (Digital Store Fund)**: $0.003/transaction + $20/site/month — available Tier 3+
+- **LFP (Loyalty Fund Program)**: Adds $0.10/eligible loyalty transaction — scales with loyalty enrollment
+- **DAF (Digital Accelerator Fund)**: $0.038/unit sold to marketed members — **Tier 4 only**, highest ceiling
+
+**Four requirements to reach Tier 4** (all required):
+1. **P+ API integration** — real-time personalized offer attribution
+2. **EAIV** — Electronic Age & Identity Verification
+3. **Monthly DDM files** — Digital Data Metric engagement reporting
+4. **ODA consent** — retailer data sharing agreement with Altria
+
+PAR handles all technical requirements. Expand below for the full Tier 4 math, qualification checklist, and program mechanics.`,
+    sectionKeys: ['ALTRIA TIER 4', 'ALTRIA (AGDC)', 'REIMBURSEMENT']
+  },
+  {
+    detect: q => ['resubmit','resubmission','historical','back data','prior','missed week','recover','switchover','switch over','old provider'].some(w => q.includes(w)),
+    intro: `PAR Retail can resubmit up to **52 weeks of historical scan data** — this is a critical differentiator when switching from a legacy provider.
+
+**When resubmissions happen:**
+- Retailer switches to PAR from another provider → PAR resubmits the gap period to recover missed rebates
+- A file was rejected or missed in a prior week → PAR resubmits the corrected file
+- POS switch caused stores to drop from reporting → PAR rebuilds and resubmits affected weeks
+
+**Important:** Resubmission acceptance is at the manufacturer's discretion — PAR advocates on the retailer's behalf but cannot guarantee out-of-window acceptance. The sooner it's caught, the better.
+
+Expand below for manufacturer-specific resubmission rules, filename conventions, and escalation paths.`,
+    sectionKeys: ['RESUBMISSION', 'COMMON ERRORS', 'ALTRIA (AGDC)', 'RJR (CIRCANA)', 'MSA SCAN']
+  }
+];
+
+function buildDetailBlocks(sections) {
+  return '<div class="kb-details">' +
+    sections.map(s => {
+      const clean = s.content.replace(/^\*\*Summary\*\*:.*\n?/m, '').replace(/^Keywords:.*\n?/m, '').trim();
+      return `<details class="kb-expand"><summary>📖 Dive deeper: ${esc(s.title)}</summary><div class="kb-expand-body">${renderMd(clean)}</div></details>`;
+    }).join('') +
+  '</div>';
+}
+
 function kbGetSummary(content) {
   // Priority 1: explicit **Summary:** line written into the KB section
   for (const line of content.split('\n')) {
