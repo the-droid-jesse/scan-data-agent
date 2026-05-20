@@ -2037,9 +2037,34 @@ function renderMd(text) {
 }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// ─── Password Gate ────────────────────────────────────────────────────────────
+(function() {
+  const PW = btoa('PAR1'); // obfuscated — not real security, just access control
+  if (sessionStorage.getItem('par_auth') === PW) {
+    document.getElementById('pw-screen').style.display = 'none';
+  }
+})();
+
+function checkPassword() {
+  const val = document.getElementById('pw-input').value.trim();
+  const PW  = btoa('PAR1');
+  if (btoa(val) === PW) {
+    sessionStorage.setItem('par_auth', PW);
+    document.getElementById('pw-screen').style.display = 'none';
+  } else {
+    const err = document.getElementById('pw-error');
+    err.textContent = 'Incorrect password. Please try again.';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+    setTimeout(() => { err.textContent = ''; }, 3000);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const k = document.getElementById('api-key-input');
   if (k) k.addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
+  const p = document.getElementById('pw-input');
+  if (p) p.addEventListener('keydown', e => { if(e.key==='Enter') checkPassword(); });
 });
 </script>
 </body>
