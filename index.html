@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scan Data Sales Agent — PAR Retail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* PAR palette — matches roadmap/internal tools */
+  --par-0: #212438;
+  --par-1: #2F3452;
+  --par-2: #8C9FFF;
+  --par-3: #6864D1;
+  --par-4: #FF5719;
+  --par-5: #F8931C;
+  --alt-ok: #34C679;
+  --alt-err: #FF2751;
+  --bg: #0f1117;
+  --bg-card: #181b27;
+  --bg-card-h: #1e2234;
+  --bg-surf: #141722;
+  --brd: #2a2e42;
+  --brd-l: #363b54;
+  --txt: #e8eaf0;
+  --txt-d: #8b90a8;
+  --txt-m: #5c6180;
+  --f: 'Manrope', Arial, sans-serif;
+  --r: 8px;
+  --rs: 4px;
+  --rl: 12px;
+  --calc-w: 368px;
+}
+
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--f); background: var(--bg); color: var(--txt); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+button { font-family: var(--f); cursor: pointer; border: none; background: none; color: inherit; }
+
+/* ── Header ── */
+header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 20px; height: 50px;
+  background: var(--par-1);
+  border-bottom: 1px solid rgba(0,0,0,.4);
+  flex-shrink: 0; position: relative;
+}
+header::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(to right, #8C9FFF 25%, #6864D1 25%, #6864D1 50%, #FF5719 50%, #FF5719 75%, #F8931C 75%);
+}
+.logo-img { height: 18px; flex-shrink: 0; display: block; }
+.hd { width: 1px; height: 20px; background: rgba(255,255,255,.15); flex-shrink: 0; }
+.htitle { font-weight: 300; font-size: .88rem; color: rgba(255,255,255,.85); letter-spacing: .02em; white-space: nowrap; }
+.htitle b { font-weight: 800; color: #fff; }
+.hright { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+
+.status-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 20px;
+  background: rgba(0,0,0,.25); border: 1px solid var(--brd);
+  font-size: .68rem; color: var(--txt-d);
+}
+.sdot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--alt-ok);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
+
+.hbtn {
+  padding: 4px 11px; border-radius: var(--rs);
+  background: rgba(0,0,0,.3); border: 1px solid var(--brd-l);
+  color: var(--txt-d); font-size: .72rem; font-weight: 600;
+  letter-spacing: .01em; transition: .12s;
+}
+.hbtn:hover { background: var(--par-0); color: var(--txt); border-color: var(--par-2); }
+.hbtn.on { background: var(--par-3); border-color: var(--par-3); color: #fff; }
+
+/* ── API Key Screen ── */
+#api-screen {
+  flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.api-card {
+  background: var(--bg-card); border: 1px solid var(--brd-l);
+  border-radius: var(--rl); padding: 36px; max-width: 440px; width: 100%; text-align: center;
+}
+.api-card .icon { font-size: 32px; margin-bottom: 14px; }
+.api-card h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; }
+.api-card p { font-size: .8rem; color: var(--txt-d); line-height: 1.7; margin-bottom: 20px; }
+.api-input {
+  width: 100%; padding: 10px 13px;
+  background: var(--bg); border: 1px solid var(--brd);
+  border-radius: var(--r); color: var(--txt); font-size: .8rem;
+  font-family: monospace; margin-bottom: 10px; outline: none; transition: border-color .15s;
+}
+.api-input:focus { border-color: var(--par-2); }
+.api-input::placeholder { color: var(--txt-m); }
+.api-btn {
+  width: 100%; padding: 10px;
+  background: linear-gradient(135deg, var(--par-4), #ea4a0a);
+  color: #fff; border: none; border-radius: var(--r);
+  font-family: var(--f); font-size: .85rem; font-weight: 700;
+  cursor: pointer; transition: .15s; letter-spacing: .01em;
+}
+.api-btn:hover { box-shadow: 0 6px 20px rgba(255,87,25,.3); transform: translateY(-1px); }
+.api-hint { font-size: .68rem; color: var(--txt-m); margin-top: 10px; }
+.api-error { color: var(--alt-err); font-size: .72rem; margin-top: 6px; min-height: 1em; }
+
+/* ── Main Layout ── */
+#chat-screen { flex: 1; display: none; overflow: hidden; }
+#chat-screen.visible { display: flex; flex-direction: row; }
+
+/* ── Chat Column ── */
+.chat-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topics-bar {
+  background: var(--bg-surf); border-bottom: 1px solid var(--brd);
+  padding: 7px 14px; display: flex; gap: 5px; flex-wrap: wrap; flex-shrink: 0; align-items: center;
+}
+.topic-pill {
+  background: var(--par-0); border: 1px solid var(--brd-l);
+  color: var(--txt-d); border-radius: 20px;
+  padding: 3px 10px; font-size: .68rem; font-weight: 600; cursor: pointer;
+  transition: .12s; white-space: nowrap;
+}
+.topic-pill:hover { background: var(--par-1); color: var(--txt); border-color: var(--par-2); }
+
+#messages {
+  flex: 1; overflow-y: auto; padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+#messages::-webkit-scrollbar { width: 3px; }
+#messages::-webkit-scrollbar-thumb { background: var(--brd-l); border-radius: 2px; }
+
+.msg { display: flex; gap: 8px; animation: fadeUp .2s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.msg.user { flex-direction: row-reverse; }
+
+.avatar {
+  width: 28px; height: 28px; border-radius: var(--rs);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .65rem; font-weight: 800; flex-shrink: 0; letter-spacing: .01em;
+}
+.avatar.ai { background: var(--par-3); color: #fff; }
+.avatar.user-av { background: var(--par-0); color: var(--par-2); border: 1px solid var(--brd-l); }
+
+.bubble {
+  max-width: calc(100% - 44px); padding: 10px 13px;
+  border-radius: var(--r); font-size: .8rem; line-height: 1.7; position: relative;
+}
+.bubble.ai {
+  background: var(--bg-card); border: 1px solid var(--brd);
+  border-top-left-radius: 2px;
+}
+.bubble.user {
+  background: var(--par-0); border: 1px solid var(--brd-l);
+  border-top-right-radius: 2px;
+}
+.bubble strong { color: var(--par-2); }
+.bubble em { color: var(--txt-d); font-style: italic; }
+.bubble code {
+  background: rgba(140,159,255,.12); border: 1px solid rgba(140,159,255,.25);
+  border-radius: 3px; padding: 1px 5px; font-family: monospace; font-size: .75rem; color: var(--par-2);
+}
+.bubble ul, .bubble ol { padding-left: 16px; margin: 5px 0; }
+.bubble li { margin: 3px 0; }
+.bubble h3 { font-size: .82rem; font-weight: 800; color: var(--par-2); margin: 8px 0 4px; }
+.bubble h4 { font-size: .72rem; font-weight: 700; color: var(--txt-m); margin: 6px 0 3px; text-transform: uppercase; letter-spacing: .06em; }
+.bubble table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .75rem; }
+.bubble th { background: rgba(140,159,255,.1); padding: 5px 8px; text-align: left; font-weight: 700; border: 1px solid var(--brd); }
+.bubble td { padding: 4px 8px; border: 1px solid var(--brd); }
+.bubble tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+.bubble p { margin: 5px 0; }
+.bubble p:first-child { margin-top: 0; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble hr { border: none; border-top: 1px solid var(--brd); margin: 8px 0; }
+
+.copy-btn {
+  position: absolute; top: 6px; right: 6px;
+  background: transparent; border: 1px solid var(--brd-l); color: var(--txt-m);
+  border-radius: 3px; padding: 1px 6px; font-size: .63rem; cursor: pointer;
+  opacity: 0; transition: opacity .12s; font-family: var(--f);
+}
+.bubble.ai:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { background: var(--par-0); color: var(--txt); }
+
+.followups { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.fu-label { font-size: .62rem; color: var(--txt-m); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.fu-chip {
+  background: var(--par-0); border: 1px solid var(--brd-l);
+  color: var(--par-2); border-radius: var(--rs);
+  padding: 4px 9px; font-size: .72rem; font-weight: 600; cursor: pointer; transition: .12s;
+}
+.fu-chip:hover { background: var(--par-1); border-color: var(--par-2); color: #fff; }
+
+.typing { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+.typing span { width: 5px; height: 5px; background: var(--txt-m); border-radius: 50%; animation: tbounce .9s infinite; }
+.typing span:nth-child(2) { animation-delay: .15s; }
+.typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes tbounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+
+.welcome {
+  background: linear-gradient(135deg, rgba(104,100,209,.1), rgba(104,100,209,.03));
+  border: 1px solid rgba(140,159,255,.2); border-radius: var(--r); padding: 16px;
+}
+.welcome h2 { font-size: .88rem; font-weight: 800; color: var(--par-2); margin-bottom: 6px; }
+.welcome p { font-size: .77rem; color: var(--txt-d); line-height: 1.7; margin-bottom: 12px; }
+.welcome-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.w-chip {
+  background: rgba(140,159,255,.08); border: 1px solid rgba(140,159,255,.2);
+  color: var(--txt); border-radius: var(--rs); padding: 5px 10px; font-size: .72rem;
+  font-weight: 600; cursor: pointer; transition: .12s; font-family: var(--f);
+}
+.w-chip:hover { background: rgba(140,159,255,.18); border-color: var(--par-2); }
+
+.input-area {
+  background: var(--bg-surf); border-top: 1px solid var(--brd);
+  padding: 10px 14px; flex-shrink: 0;
+}
+.input-row { display: flex; gap: 7px; align-items: flex-end; }
+#user-input {
+  flex: 1; background: var(--bg-card); border: 1px solid var(--brd);
+  border-radius: var(--r); color: var(--txt); font-size: .8rem; font-family: var(--f);
+  padding: 9px 12px; resize: none; line-height: 1.5;
+  min-height: 40px; max-height: 110px; outline: none; transition: border-color .15s;
+}
+#user-input:focus { border-color: var(--par-2); }
+#user-input::placeholder { color: var(--txt-m); }
+.send-btn {
+  width: 40px; height: 40px; border-radius: var(--r);
+  background: linear-gradient(135deg, var(--par-4), #ea4a0a);
+  border: none; color: #fff; font-size: 1rem; cursor: pointer; transition: .15s;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.send-btn:hover { box-shadow: 0 4px 14px rgba(255,87,25,.35); transform: translateY(-1px); }
+.send-btn:disabled { background: var(--par-0); box-shadow: none; transform: none; cursor: not-allowed; }
+.input-hint { font-size: .62rem; color: var(--txt-m); margin-top: 5px; text-align: center; }
+
+/* ── Calculator Panel ── */
+.calc-panel {
+  width: var(--calc-w); flex-shrink: 0;
+  background: var(--bg-surf); border-left: 1px solid var(--brd);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: width .22s ease, opacity .22s ease;
+}
+.calc-panel.collapsed { width: 0; opacity: 0; pointer-events: none; }
+
+.calc-header {
+  padding: 0 16px; height: 50px; border-bottom: 1px solid var(--brd);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  background: var(--par-0);
+}
+.calc-header-title { font-size: .82rem; font-weight: 800; color: var(--txt); }
+.calc-header-sub { font-size: .65rem; color: var(--txt-m); margin-top: 1px; }
+.calc-close {
+  width: 24px; height: 24px; border-radius: var(--rs);
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.25); border: 1px solid var(--brd-l);
+  color: var(--txt-m); font-size: .9rem; cursor: pointer; transition: .12s; flex-shrink: 0;
+}
+.calc-close:hover { background: var(--brd-l); color: var(--txt); }
+
+.calc-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.calc-body::-webkit-scrollbar { width: 3px; }
+.calc-body::-webkit-scrollbar-thumb { background: var(--brd-l); border-radius: 2px; }
+
+.calc-sec {
+  background: var(--bg-card); border: 1px solid var(--brd);
+  border-radius: var(--r); padding: 12px 13px;
+}
+.calc-sec-title {
+  font-size: .65rem; font-weight: 800; color: var(--txt-m);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px;
+}
+
+/* Program tabs */
+.prog-tabs { display: flex; gap: 3px; }
+.prog-tab {
+  flex: 1; padding: 5px 4px; text-align: center; font-size: .7rem; font-weight: 700;
+  border: 1px solid var(--brd); border-radius: var(--rs); cursor: pointer;
+  color: var(--txt-m); background: var(--par-0); transition: .12s; font-family: var(--f);
+}
+.prog-tab:hover { border-color: var(--brd-l); color: var(--txt); }
+.prog-tab.active { background: var(--par-3); border-color: var(--par-3); color: #fff; }
+
+/* Sliders */
+.field-grp { margin-bottom: 10px; }
+.field-grp:last-child { margin-bottom: 0; }
+.field-lbl {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .72rem; color: var(--txt-d); margin-bottom: 5px; font-weight: 500;
+}
+.field-lbl strong { color: var(--par-2); font-weight: 800; font-size: .75rem; }
+input[type=range] {
+  width: 100%; height: 3px; accent-color: var(--par-4);
+  background: var(--brd-l); border-radius: 2px; cursor: pointer;
+  -webkit-appearance: none; appearance: none; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  background: var(--par-4); border-radius: 50%; cursor: pointer; border: 2px solid var(--bg);
+  box-shadow: 0 0 6px rgba(255,87,25,.4);
+}
+.slider-note { font-size: .62rem; color: var(--txt-m); margin-top: 3px; }
+
+/* Results */
+.result-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+.res-card {
+  background: var(--bg); border: 1px solid var(--brd);
+  border-radius: var(--r); padding: 10px 11px; text-align: center;
+}
+.res-card.par { border-color: rgba(255,87,25,.35); background: rgba(255,87,25,.05); }
+.res-lbl { font-size: .6rem; color: var(--txt-m); margin-bottom: 3px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.res-val { font-size: 1.3rem; font-weight: 800; letter-spacing: -.03em; color: var(--txt); }
+.res-card.par .res-val { color: var(--par-5); }
+.res-sub { font-size: .62rem; color: var(--txt-m); margin-top: 2px; }
+
+.breakdown { font-size: .72rem; color: var(--txt-d); display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.bk-row { display: flex; justify-content: space-between; }
+.bk-val { color: var(--txt); font-weight: 700; }
+.bk-divider { border-top: 1px solid var(--brd); padding-top: 3px; margin-top: 2px; }
+
+.adv-bar {
+  background: linear-gradient(90deg, rgba(52,198,121,.08), rgba(52,198,121,.04));
+  border: 1px solid rgba(52,198,121,.3); border-radius: var(--r);
+  padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.adv-left .adv-label { font-size: .68rem; color: #86efac; font-weight: 700; }
+.adv-left .adv-sub { font-size: .62rem; color: var(--txt-m); margin-top: 2px; }
+.adv-val { font-size: 1.15rem; font-weight: 800; letter-spacing: -.03em; color: var(--alt-ok); white-space: nowrap; }
+
+.calc-action-btn {
+  width: 100%; padding: 8px; margin-top: 4px;
+  background: rgba(140,159,255,.1); border: 1px solid rgba(140,159,255,.25);
+  color: var(--par-2); border-radius: var(--r); font-size: .75rem; font-weight: 700;
+  cursor: pointer; transition: .12s; font-family: var(--f); letter-spacing: .01em;
+}
+.calc-action-btn:hover { background: rgba(140,159,255,.2); border-color: var(--par-2); color: #fff; }
+
+/* Tier 4 */
+.t4-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.t4-row-label { font-size: .77rem; font-weight: 700; color: var(--txt); }
+.tog {
+  width: 30px; height: 17px; background: var(--brd-l); border-radius: 9px;
+  position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0;
+}
+.tog.on { background: var(--par-4); }
+.tog::after {
+  content: ''; position: absolute; left: 2px; top: 2px;
+  width: 13px; height: 13px; background: #fff; border-radius: 50%; transition: transform .2s;
+}
+.tog.on::after { transform: translateX(13px); }
+
+.t4-body { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.t4-num-row { display: flex; gap: 7px; }
+.t4-field { flex: 1; }
+.t4-field label { font-size: .65rem; color: var(--txt-m); display: block; margin-bottom: 3px; font-weight: 600; }
+.t4-input {
+  width: 100%; padding: 6px 8px; background: var(--bg); border: 1px solid var(--brd);
+  border-radius: var(--rs); color: var(--txt); font-size: .77rem; outline: none;
+  font-family: var(--f); transition: border-color .15s;
+}
+.t4-input:focus { border-color: var(--par-2); }
+
+.t4-reqs-title { font-size: .65rem; font-weight: 800; color: var(--txt-m); text-transform: uppercase; letter-spacing: .06em; }
+.t4-reqs { display: flex; flex-direction: column; gap: 5px; }
+.t4-req {
+  display: flex; align-items: center; gap: 7px;
+  font-size: .72rem; color: var(--txt-d); cursor: pointer; font-family: var(--f);
+}
+.t4-req input[type=checkbox] { accent-color: var(--par-4); width: 13px; height: 13px; cursor: pointer; }
+
+.tier-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px; border-radius: 20px; font-size: .6rem; font-weight: 800;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.tier-t4 { background: rgba(255,87,25,.15); border: 1px solid rgba(255,87,25,.35); color: var(--par-4); }
+.tier-t3 { background: rgba(140,159,255,.15); border: 1px solid rgba(140,159,255,.35); color: var(--par-2); }
+.tier-t12 { background: rgba(92,97,128,.15); border: 1px solid rgba(92,97,128,.35); color: var(--txt-m); }
+
+.t4-prog-list { display: flex; flex-direction: column; gap: 5px; }
+.t4-prog {
+  background: var(--bg); border: 1px solid var(--brd); border-radius: var(--r);
+  padding: 9px 11px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  opacity: .45;
+}
+.t4-prog.avail { opacity: 1; }
+.t4-prog.best { border-color: rgba(255,87,25,.4); background: rgba(255,87,25,.05); }
+.t4-prog-info { flex: 1; min-width: 0; }
+.t4-prog-name { font-size: .72rem; font-weight: 800; color: var(--txt); }
+.t4-prog-rate { font-size: .63rem; color: var(--txt-m); margin-top: 1px; }
+.t4-prog-val { font-size: .9rem; font-weight: 800; color: var(--txt-m); white-space: nowrap; letter-spacing: -.02em; }
+.t4-prog.avail .t4-prog-val { color: var(--par-5); }
+.best-tag {
+  font-size: .58rem; background: var(--par-4); color: #fff;
+  border-radius: 3px; padding: 1px 5px; margin-left: 4px; font-weight: 800;
+}
+
+.calc-footnote { font-size: .62rem; color: var(--txt-m); line-height: 1.55; }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <img src="https://partech.com/wp-content/uploads/2025/11/par-logo.svg" alt="PAR" class="logo-img">
+  <div class="hd"></div>
+  <span class="htitle"><b>Scan Data</b> Sales Agent</span>
+  <div class="hright">
+    <div class="status-pill">
+      <div class="sdot" id="status-dot"></div>
+      <span id="status-label">Ready</span>
+    </div>
+    <button class="hbtn" id="calc-toggle-btn" onclick="toggleCalc()">💰 Estimator</button>
+    <button class="hbtn" onclick="clearChat()">Clear</button>
+    <button class="hbtn" id="mode-btn" onclick="toggleMode()">🔑 Add AI Key</button>
+  </div>
+</header>
+
+<!-- ── API Key Screen ── -->
+<div id="api-screen">
+  <div class="api-card">
+    <div class="icon">🔑</div>
+    <h2>Unlock AI-Powered Answers</h2>
+    <p>Enter your Anthropic API key to enable full Claude AI responses. Your key stays in this browser only — never sent anywhere except the Anthropic API.</p>
+    <input class="api-input" type="password" id="api-key-input" placeholder="sk-ant-api03-…" autocomplete="off" />
+    <div id="api-error" class="api-error"></div>
+    <button class="api-btn" onclick="saveKey()">Enable AI Mode →</button>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;height:1px;background:var(--brd)"></div>
+      <span style="font-size:.68rem;color:var(--txt-m)">or</span>
+      <div style="flex:1;height:1px;background:var(--brd)"></div>
+    </div>
+    <button class="api-btn" onclick="enterKbMode()" style="background:rgba(140,159,255,.12);border:1px solid var(--par-2);color:var(--par-2);margin-top:12px">📚 Use Knowledge Base Mode</button>
+    <div class="api-hint" style="margin-top:8px">KB Mode: instant answers from the embedded Scan Data knowledge base — no key, no cost, works everywhere.</div>
+  </div>
+</div>
+
+<!-- ── Chat Screen ── -->
+<div id="chat-screen">
+
+  <!-- Chat column -->
+  <div class="chat-col">
+    <div class="topics-bar">
+      <span style="font-size:.63rem;color:var(--txt-m);align-self:center;margin-right:2px;white-space:nowrap;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Quick:</span>
+      <button class="topic-pill" onclick="ask('What is Scan Data and why do retailers care about it?')">What is Scan Data?</button>
+      <button class="topic-pill" onclick="ask('How does the Altria scan data program work?')">Altria Programs</button>
+      <button class="topic-pill" onclick="ask('How does the RJR scan data program work?')">RJR Programs</button>
+      <button class="topic-pill" onclick="ask('What is the onboarding process for a new scan data customer?')">Onboarding</button>
+      <button class="topic-pill" onclick="ask('What are the minimum technical requirements to go live with Scan Data?')">Min Requirements</button>
+      <button class="topic-pill" onclick="ask('What is Personalization Plus (P+) and who qualifies for Tier 4?')">P+ / Tier 4</button>
+      <button class="topic-pill" onclick="ask('What are the most common scan data errors and how are they fixed?')">Common Errors</button>
+      <button class="topic-pill" onclick="ask('How is PAR Retail different from a legacy scan data provider?')">PAR vs. Legacy</button>
+    </div>
+
+    <div id="messages">
+      <div class="msg">
+        <div class="avatar ai">SD</div>
+        <div class="bubble ai">
+          <div class="welcome">
+            <h2>Scan Data Expert — Ready for your call</h2>
+            <p>Ask me anything about PAR Retail's Scan Data programs — Altria, RJR, onboarding, technical requirements, common objections, and more. Open <strong>💰 Estimator</strong> to run live reimbursement math.</p>
+            <div class="fu-label" style="margin-bottom:5px">Jump in with a common question:</div>
+            <div class="welcome-chips">
+              <button class="w-chip" onclick="ask('What exactly is Scan Data and how does it benefit a retailer financially?')">💰 Retailer ROI &amp; incentives</button>
+              <button class="w-chip" onclick="ask('How long does it take to onboard a new scan data customer from start to live?')">⏱ Onboarding timeline</button>
+              <button class="w-chip" onclick="ask('What POS systems does PAR Retail support for Scan Data?')">🖥 POS support</button>
+              <button class="w-chip" onclick="ask('What is the difference between multi-unit and loyalty offers in scan data?')">🏷 MU vs. loyalty</button>
+              <button class="w-chip" onclick="ask('How is PAR Retail different from a legacy scan data provider?')">🆚 PAR vs. legacy</button>
+              <button class="w-chip" onclick="ask('What does a retailer need to provide to get started with scan data?')">📋 Getting started</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <textarea id="user-input" placeholder="Ask anything about Scan Data…" rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">&#10148;</button>
+      </div>
+      <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+    </div>
+  </div>
+
+  <!-- ── Calculator Panel ── -->
+  <div class="calc-panel collapsed" id="calc-panel">
+    <div class="calc-header">
+      <div>
+        <div class="calc-header-title">Reimbursement Estimator</div>
+        <div class="calc-header-sub">PAR Retail benchmark data · Yesway 443-store anchor</div>
+      </div>
+      <button class="calc-close" onclick="toggleCalc()">✕</button>
+    </div>
+
+    <div class="calc-body">
+
+      <!-- Program -->
+      <div class="calc-sec">
+        <div class="calc-sec-title">Program Mix</div>
+        <div class="prog-tabs">
+          <button class="prog-tab active" id="pt-all"    onclick="setProgram('all')">All Programs</button>
+          <button class="prog-tab"        id="pt-altria" onclick="setProgram('altria')">Altria Only</button>
+          <button class="prog-tab"        id="pt-rjr"    onclick="setProgram('rjr')">RJR Only</button>
+        </div>
+      </div>
+
+      <!-- Inputs -->
+      <div class="calc-sec">
+        <div class="calc-sec-title">Your Network</div>
+
+        <div class="field-grp">
+          <div class="field-lbl"><span>Number of stores</span><strong id="lbl-sites">100</strong></div>
+          <input type="range" id="sl-sites" min="10" max="3000" value="100" step="10" oninput="updateCalc()">
+        </div>
+        <div class="field-grp">
+          <div class="field-lbl"><span>Pass-through rate</span><strong id="lbl-rate">95%</strong></div>
+          <input type="range" id="sl-rate" min="70" max="99" value="95" step="1" oninput="updateCalc()">
+          <div class="slider-note">PAR avg: 95% &nbsp;·&nbsp; Industry avg: 80%</div>
+        </div>
+        <div class="field-grp">
+          <div class="field-lbl"><span>Loyalty take rate</span><strong id="lbl-lr">38%</strong></div>
+          <input type="range" id="sl-lr" min="0" max="60" value="38" step="1" oninput="updateCalc()">
+          <div class="slider-note">PAR avg: 38% &nbsp;·&nbsp; Industry avg: 18%</div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="calc-sec">
+        <div class="calc-sec-title">Estimated Annual Reimbursement</div>
+        <div class="result-pair">
+          <div class="res-card par">
+            <div class="res-lbl">PAR Retail</div>
+            <div class="res-val" id="res-par">—</div>
+            <div class="res-sub">per year</div>
+          </div>
+          <div class="res-card">
+            <div class="res-lbl">Industry Avg</div>
+            <div class="res-val" id="res-ind">—</div>
+            <div class="res-sub">per year</div>
+          </div>
+        </div>
+        <div class="breakdown" id="res-breakdown"></div>
+        <div class="adv-bar">
+          <div class="adv-left">
+            <div class="adv-label">PAR Retail advantage</div>
+            <div class="adv-sub" id="adv-sub"></div>
+          </div>
+          <div class="adv-val" id="res-adv">—</div>
+        </div>
+        <button class="calc-action-btn" onclick="askAboutEstimate()">Ask agent about this estimate →</button>
+      </div>
+
+      <!-- Tier 4 -->
+      <div class="calc-sec">
+        <div class="calc-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Altria Tier 4 Incentives</span>
+          <span id="t4-badge-wrap"></span>
+        </div>
+        <div class="t4-row" onclick="toggleT4()">
+          <div class="t4-row-label">Enable Tier 4 modeling</div>
+          <div class="tog" id="t4-tog"></div>
+        </div>
+        <div class="t4-body" id="t4-body" style="display:none">
+          <div style="font-size:.7rem;color:var(--txt-d);line-height:1.6">
+            Model DSF, LFP, and DAF incentives. Enter your monthly transaction volume and check which Tier 4 requirements your retailer meets.
+          </div>
+          <div class="t4-num-row">
+            <div class="t4-field">
+              <label>Monthly tobacco txns/store</label>
+              <input class="t4-input" type="number" id="t4-txns" value="500" min="1" oninput="updateCalc()">
+            </div>
+            <div class="t4-field">
+              <label>Avg units / loyalty txn</label>
+              <input class="t4-input" type="number" id="t4-units" value="2" min="1" step="0.5" oninput="updateCalc()">
+            </div>
+          </div>
+          <div class="t4-reqs-title">Requirements met:</div>
+          <div class="t4-reqs">
+            <label class="t4-req"><input type="checkbox" id="t4-pp"   checked onchange="updateCalc()"><span><b>P+ API</b> — Personalization Plus integration</span></label>
+            <label class="t4-req"><input type="checkbox" id="t4-eaiv" checked onchange="updateCalc()"><span><b>EAIV</b> — Electronic age verification</span></label>
+            <label class="t4-req"><input type="checkbox" id="t4-ddm"  checked onchange="updateCalc()"><span><b>DDM files</b> — Monthly digital data metric</span></label>
+            <label class="t4-req"><input type="checkbox" id="t4-seg"  checked onchange="updateCalc()"><span><b>Digital targeting</b> — State/ZIP/purchase history</span></label>
+          </div>
+          <div id="t4-results"></div>
+        </div>
+      </div>
+
+      <div class="calc-footnote">
+        * Benchmarks: $299/store/wk all programs (Altria $186, RJR $97, MSA $16). Loyalty at $177/store/wk × 38% take rate; multi-unit at $122/store/wk. Industry comparison: 80% pass-through, 18% loyalty take rate. Tier 4: $0.003/tx base, $20/store/mo DSF, +$0.10/loyalty tx LFP, $0.038/marketed unit DAF.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Calculator constants (from PAR Retail scan data webpage) ─────────────────
+const PAR_RATE = 0.95, IND_RATE = 0.80;
+const PAR_LR   = 0.38, IND_LR   = 0.18;
+const WEEKLY_LOYALTY = 177, WEEKLY_MULTI = 122;
+const WEEKLY_STORE   = { all: 299, altria: 186, rjr: 97, msa: 16 };
+
+let _prog = 'all', _t4On = false;
+
+function setProgram(p) {
+  _prog = p;
+  ['all','altria','rjr'].forEach(id =>
+    document.getElementById('pt-' + id).classList.toggle('active', id === p));
+  updateCalc();
+}
+
+function toggleT4() {
+  _t4On = !_t4On;
+  document.getElementById('t4-tog').classList.toggle('on', _t4On);
+  document.getElementById('t4-body').style.display = _t4On ? 'flex' : 'none';
+  updateCalc();
+}
+
+function updateCalc() {
+  const sites = parseInt(document.getElementById('sl-sites').value) || 100;
+  const rate  = parseInt(document.getElementById('sl-rate').value)  / 100;
+  const lr    = parseInt(document.getElementById('sl-lr').value)    / 100;
+
+  document.getElementById('lbl-sites').textContent = sites.toLocaleString();
+  document.getElementById('lbl-rate').textContent  = Math.round(rate * 100) + '%';
+  document.getElementById('lbl-lr').textContent    = Math.round(lr * 100)   + '%';
+
+  const scale = _prog === 'all' ? 1 : WEEKLY_STORE[_prog] / WEEKLY_STORE.all;
+  const wLoy  = WEEKLY_LOYALTY * scale, wMu = WEEKLY_MULTI * scale;
+
+  const parLoy = sites * 52 * wLoy * (lr / PAR_LR) * (rate / PAR_RATE);
+  const parMu  = sites * 52 * wMu  * (rate / PAR_RATE);
+  const parAnn = parLoy + parMu;
+  const indLoy = sites * 52 * wLoy * (IND_LR / PAR_LR) * (IND_RATE / PAR_RATE);
+  const indMu  = sites * 52 * wMu  * (IND_RATE / PAR_RATE);
+  const indAnn = indLoy + indMu;
+  const adv    = parAnn - indAnn;
+
+  document.getElementById('res-par').textContent = '$' + fmtK(parAnn);
+  document.getElementById('res-ind').textContent = '$' + fmtK(indAnn);
+  document.getElementById('res-adv').textContent = '+$' + fmtK(adv);
+  document.getElementById('adv-sub').textContent =
+    `$${fmtK(adv / sites)}/store/yr · $${fmtK(adv / sites / 52)}/store/wk`;
+
+  document.getElementById('res-breakdown').innerHTML = `
+    <div class="bk-row"><span>Loyalty (PAR)</span><span class="bk-val">$${fmtK(parLoy)}/yr</span></div>
+    <div class="bk-row"><span>Multi-unit (PAR)</span><span class="bk-val">$${fmtK(parMu)}/yr</span></div>
+    <div class="bk-row bk-divider" style="color:var(--txt-m)">
+      <span>Industry avg total</span><span class="bk-val" style="color:var(--txt-m)">$${fmtK(indAnn)}/yr</span>
+    </div>`;
+
+  if (_t4On) {
+    const hasP = document.getElementById('t4-pp').checked;
+    const hasE = document.getElementById('t4-eaiv').checked;
+    const hasD = document.getElementById('t4-ddm').checked;
+    const hasS = document.getElementById('t4-seg').checked;
+    const iT4  = hasP && hasE && hasD && hasS;
+    const iT3  = hasP;
+
+    const txns  = parseFloat(document.getElementById('t4-txns').value)  || 500;
+    const units = parseFloat(document.getElementById('t4-units').value) || 2;
+    const loyTx = txns * lr;
+    const base  = sites * txns * 0.003;
+
+    const dsfAnn = (base + sites * 20)                          * 12;
+    const lfpAnn = iT3 ? (base + sites * loyTx * 0.10)         * 12 : base * 12;
+    const dafAnn = iT4 ? (base + sites * loyTx * 0.80 * units * 0.038) * 12 : base * 12;
+
+    const vals   = { DSF: dsfAnn, LFP: lfpAnn, DAF: dafAnn };
+    const avail  = { DSF: iT3, LFP: iT3, DAF: iT4 };
+    const best   = Object.keys(vals).filter(k => avail[k]).sort((a,b)=>vals[b]-vals[a])[0] || null;
+
+    const tClass = iT4 ? 'tier-t4' : iT3 ? 'tier-t3' : 'tier-t12';
+    const tLabel = iT4 ? 'Tier 4 ✓' : iT3 ? 'Tier 3' : 'Tier 1–2';
+    document.getElementById('t4-badge-wrap').innerHTML =
+      `<span class="tier-badge ${tClass}">${tLabel}</span>`;
+
+    const progs = [
+      { id:'DSF', name:'Digital Store Fund',       rate:'$20/store/month',          val:dsfAnn },
+      { id:'LFP', name:'Digital LFP Offer',         rate:'+$0.10/loyalty txn',       val:lfpAnn },
+      { id:'DAF', name:'Digital Accelerator Fund',  rate:'$0.038/marketed unit sold', val:dafAnn },
+    ];
+    document.getElementById('t4-results').innerHTML = `
+      <div class="t4-prog-list">
+        ${progs.map(p => `
+          <div class="t4-prog ${avail[p.id]?'avail':''} ${p.id===best&&avail[p.id]?'best':''}">
+            <div class="t4-prog-info">
+              <div class="t4-prog-name">${p.id} — ${p.name}${p.id===best&&avail[p.id]?'<span class="best-tag">Best</span>':''}</div>
+              <div class="t4-prog-rate">${p.rate}</div>
+            </div>
+            <div class="t4-prog-val">${avail[p.id] ? '$'+fmtK(p.val) : '—'}</div>
+          </div>`).join('')}
+      </div>
+      <div style="font-size:.62rem;color:var(--txt-m);margin-top:7px;line-height:1.55">
+        * Base $0.003/tx (Tier 3–4). LFP at ${Math.round(lr*100)}% loyalty penetration.
+        DAF at 80% of loyalty txns with active offer × ${units} avg units.
+        ${!iT3 ? 'Enable P+ API for Tier 3+ access.' : !iT4 ? 'Check all 4 requirements to unlock DAF (Tier 4).' : ''}
+      </div>`;
+  } else {
+    document.getElementById('t4-badge-wrap').innerHTML = '';
+    document.getElementById('t4-results').innerHTML = '';
+  }
+}
+
+function fmtK(n) {
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(2).replace(/\.?0+$/,'') + 'M';
+  if (n >= 1_000)     return Math.round(n/1_000) + 'K';
+  return Math.round(n).toLocaleString();
+}
+
+let _calcOpen = false;
+function toggleCalc() {
+  _calcOpen = !_calcOpen;
+  document.getElementById('calc-panel').classList.toggle('collapsed', !_calcOpen);
+  document.getElementById('calc-toggle-btn').classList.toggle('on', _calcOpen);
+  if (_calcOpen) updateCalc();
+}
+
+function askAboutEstimate() {
+  const sites  = document.getElementById('sl-sites').value;
+  const rate   = document.getElementById('sl-rate').value;
+  const lr     = document.getElementById('sl-lr').value;
+  const parVal = document.getElementById('res-par').textContent;
+  const indVal = document.getElementById('res-ind').textContent;
+  const advVal = document.getElementById('res-adv').textContent;
+  const prog   = { all:'Altria + RJR + MSA', altria:'Altria only', rjr:'RJR only' }[_prog];
+  const t4note = _t4On ? ` Tier 4 is enabled with ${document.getElementById('t4-txns').value} monthly txns/store.` : '';
+  ask(`I just ran the estimator: ${sites} stores, ${rate}% pass-through, ${lr}% loyalty take rate, program: ${prog}. PAR Retail estimate: ${parVal}/yr vs industry avg ${indVal}/yr — that's a ${advVal} advantage.${t4note} Can you walk me through what's driving these numbers and how to explain this to the customer?`);
+}
+
+// ─── System Prompt ────────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are an expert Scan Data sales assistant for PAR Retail. You help sales reps answer any question a prospect or customer may ask during a sales call about PAR Retail's Scan Data capabilities. Give detailed, accurate, confident answers grounded in real program specifics.
+
+After every answer, suggest exactly 3 concise follow-up questions the prospect might naturally ask next — formatted as a JSON array at the very end of your response like this:
+
+FOLLOWUPS:["Question 1?","Question 2?","Question 3?"]
+
+Always include that line at the end. Keep follow-up questions short (under 12 words each).
+
+---
+
+# PAR Retail Scan Data — Complete Knowledge Base (Confluence-sourced, May 2026)
+
+## WHAT IS SCAN DATA?
+
+Scan Data is a once-weekly transactional feed sent to tobacco manufacturers that proves a specific sale occurred at a specific price to a specific customer — effectively the "receipt" that triggers manufacturer-funded rebates and incentive payments.
+
+**The Three Pillars of a Scan Data File:**
+1. **Purchases** — What was sold: UPC, quantity, timestamp, store location, final price
+2. **Discounts** — Was a manufacturer-approved promotion applied at the register (multi-unit or loyalty)?
+3. **Loyalty Participation** — Did the customer provide an ID (phone number) to access manufacturer offers?
+
+**Why It Matters:**
+- **Reimbursement**: No scan data = No rebate check. It is the submission that unlocks manufacturer incentive payments
+- **Verification**: Proves to manufacturers that a discount was actually given to a real customer
+- **Compliance**: Ensures the store follows program requirements and pricing guidelines
+- **Without scan data, retailers leave real money on the table every week — permanently**
+
+**Value Chain:** Consumers get reduced prices → Retailers get reimbursements → Manufacturers get granular store-level purchase data → More trips driven by competitive pricing
+
+**What scan data actually is (not just TLogs):**
+Scan data is the merged output of: raw transaction logs (items, quantities, timestamps, multi-unit behavior) + loyalty system data (member ID, offer attribution, loyalty discount details) → combined into the final manufacturer-formatted submission file.
+
+**Health metrics — what "good" scan data looks like:**
+| Metric | Definition | Goal |
+|---|---|---|
+| Pass-through % | % of transactions accepted by manufacturer | >95% (PAR avg) vs ~80% industry |
+| Completeness | No gaps in store/day coverage | 100% store/day coverage |
+| Timeliness | Submitted within weekly windows | Zero missed deadlines |
+| Traceability | Rows traceable back to original TLog | Full audit readiness |
+
+---
+
+## REIMBURSEMENT MATH & BENCHMARKS
+
+Keywords: earnings estimate chain store count earn expect revenue annual reimbursement payout how much money
+
+**Real benchmarks (Yesway anchor data — 443 stores):**
+- All programs combined: **$299/store/week** (Altria $186, RJR $97, MSA $16)
+- Loyalty component: **$177/store/week** at 38% take rate
+- Multi-unit component: **$122/store/week**
+- PAR pass-through: **95%** vs industry 80% (+15 percentage points)
+- PAR loyalty take rate: **38%** vs industry 18% (more than 2× industry average)
+
+**Core formula:**
+- PAR Annual = sites × 52 × [$177 × (your_lr/38%) + $122] × (your_rate/95%)
+- Industry Annual = sites × 52 × [$177 × (18%/38%) + $122] × (80%/95%)
+
+**Scale estimates (PAR vs. industry):**
+- 50 stores: ~$80K–$150K/year additional
+- 100 stores: ~$175K–$350K/year additional
+- 250 stores: ~$450K–$900K/year additional
+- 500+ stores: Often $1M+ in additional annual reimbursements
+
+**Per-transaction values:** Altria loyalty $1.92/tx; RJR loyalty $1.10/tx
+
+**Why PAR's numbers are higher:**
+- Pre-submission error correction catches bad data before Circana/AGDC sees it. Post-rejection = that week's money is gone.
+- PAR's loyalty platform (Activate) drives higher loyalty take rates (38% vs 18% industry) because the offers are better-targeted and the UX for enrolling members is frictionless.
+- 95% pass-through means 95% of submitted transactions result in reimbursement. Every point below 95% is direct money left on the table.
+
+---
+
+## MANUFACTURERS & DATA BROKERS — THE GOLDEN RULE
+
+- **Program rules / money / eligibility / rebate disputes** → Manufacturer (Altria AGDC, RJR/RMSC, PMI, Juul)
+- **File formatting / submission / SFTP / technical errors** → Data Broker (Circana, MSA)
+
+**Who processes what:**
+| Manufacturer | Data Broker | Program Name |
+|---|---|---|
+| Altria (AGDC) | AGDC Scan Data Help Desk (proprietary) | Digital Trade Program (DTP) |
+| RJR / RMSC | Circana | RMSC Retail Scan Data Program |
+| PMI U.S. | Circana | Smoke-Free Performance Program (SFPP) |
+| Juul | None — direct to Juul | No formal program name |
+| Liggett (Vector Group) | MSA | RSS Shared File Format |
+
+**Note:** MSA = Management Science Associates (the data broker), NOT the Master Settlement Agreement.
+
+**Troubleshooting routing:**
+- File rejected immediately / formatting error / SFTP down → Contact Data Broker (Circana/MSA/AGDC Help Desk)
+- File accepted but specific rows flagged / UPC not eligible / rebate amount looks short → Contact Manufacturer
+
+---
+
+## ALTRIA (AGDC) SCAN DATA — DEEP DIVE
+
+Keywords: Altria AGDC call contact phone help desk submission deadline cap resubmission STARS week file format 45 fields named pipe LFP reporting
+
+**Program:** AGDC Digital Trade Program (DTP). Altria's longest-running and highest-value program for PAR Retail. ATOC brands: PM USA (Marlboro), USSTC (Copenhagen, Skoal), JMC (cigars), Helix Innovations (on!), NJOY.
+
+**Key Admin:**
+- sFTP: www.scandata2.insightsc3m.com
+- Help Desk: 844-230-3454
+- Submission status portal: AGDCNow.com
+- Spec version: 2026 (effective December 28, 2025)
+
+**Three Altria Scan Data Program Types:**
+1. **Multi-Unit (MU) Offers** — POS-level discounts applied at register. In TLogs only; not via Activate. Example: "Buy 2 packs, save $1.00." Field 20 (Multi-Unit Indicator = Y), Fields 21-22 (quantity and amount).
+2. **Loyalty (Everyday Value)** — Via PAR Retail's Activate loyalty platform. Requires customer loyalty ID in Field 37. Reported in Fields 29-30 (Loyalty Discount Name and Amount). MU and Loyalty can occur in same transaction but must be reported separately.
+3. **Personalized Offers (P+)** — 1-to-1 targeted offers via Altria API. Tier 4 only. Reported via DDM files (Digital Data Metric), not standard scan data. Generates highest per-transaction value.
+
+**File Format — AGDC is completely different from RJR/PMI:**
+- **45 fields** (31 required + 14 optional) — proprietary format, not Circana RSS
+- Pipe-delimited (`|`), may be zipped (.zip)
+- **Summary line REQUIRED as the very first line:** `[Row Count]|[Sum Qty]|[Sum Final Sales Price]|[Scan Data Provider Name]` — Example: `28981|36294|483354.32|PARRetail`
+- **Consumer Units field (Field 19):** Reports individual units per UOM (e.g., 10 for carton). Not present in Circana format.
+- Transaction Time (Field 4): HH:MM:SS 24-hour required. Must never be 00:00:00 unless exactly midnight.
+- CBD products must NEVER be included — inclusion risks loss of promotional fund payments for the entire month.
+
+**File Naming:** `[AccountOrChainName][YYYYMMDD]` — date is week ending Saturday. Example: `Delek20260301.txt`
+
+**Submission Deadline:** Every **Wednesday by 5:00 PM EST** (some internal references note Tuesday for STARS Week; use Wednesday as the hard internal SLA).
+
+**Data window:** 7 consecutive days ending Saturday (STARS Week). Altria week = Sunday 00:00:01 → Saturday 23:59:59.
+
+**Submission Cap:** CRITICAL — total weekly files submitted in a Promotion Period must not exceed **2x the number of weeks** in that period. Exceeding the cap forfeits the base incentive for the entire period. Historical resubmissions count toward the period in which they are submitted, not their original week.
+
+**Resubmission filename:** Add version suffix — `Delek20241026v2.txt`.
+
+**LFP (Loyalty Fund Program) Reporting — required for P+ and Everyday Value:**
+- Report LFP Promotion Code in Field 29 — exact codes found on AGDCNow.com each promotion period. No extra characters, periods, or dashes.
+- Report Loyalty ID in Field 37 on every qualifying transaction — required all 52 weeks.
+- Loyalty ID must be unique per customer. Generic IDs or IDs used >5x/day are ineligible for payment.
+- Two reporting methods: column reporting (discount inline on same transaction line) or UPC reporting (separate line with negative Field 31).
+
+**Onboarding:** Contact Help Desk → submit one first file for format approval → receive email confirmation → begin production. Simpler than Circana (no multi-week certification).
+
+---
+
+## RJR (CIRCANA) SCAN DATA — DEEP DIVE
+
+Keywords: RJR Circana stages onboarding enrollment testing certification production 4 stages Reynolds RMSC deadline data window Monday Sunday file format 34 fields Circana 4 stages onboarding process Circana stages Circana field numbers loyalty field 33
+
+**Program:** RMSC Retail Scan Data Program. Reynolds Marketing Services Company (RMSC) uses Circana as designated data processor.
+
+**Key Admin:**
+- Circana Support: BATRSDHelpDesk@Circana.com | 1-855-477-9799 | https://retailscansupport.circana.com
+- Spec version: October 2024
+
+**Three RJR Scan Data Program Types:**
+1. **Multi-pack discounts** — Manufacturer-funded multi-unit offers at POS
+2. **Loyalty rewards** — Via PAR Retail's Activate, merged with transaction data
+3. **Buydowns** — Temporary price reductions to hit a target retail price point
+4. **RJR Auto Offers (coming)** — API-generated personalized offers included as coupons in scan data
+
+**File Format:**
+- **34 fields** (Circana RSS) — identical schema to PMI SFPP
+- Pipe-delimited, with or without header row
+- **No summary line required** (unlike Altria AGDC)
+- Compression: .zip or .gz acceptable
+
+**File Naming:** `[SubmitterID]_[YYYYMMDD]_[HH24MM]_[FilePrefix].[ext]`
+- SubmitterID = RMSC Account Number (provided in Circana Welcome Email)
+- FilePrefix = retailer name as in Welcome Email, no spaces/special characters
+- Example: `B42916_20251116_0000_EGRetailAmericaLLC.txt`
+- **Resubmission:** Same filename (overwrites). Only alter the time component if needed. Example: `823720_20241120_0001_SOUTHWESTCONVHQ.txt`
+
+**Submission Deadline:** Every **Wednesday by 5:00 PM EST**
+
+**Data window:** Monday 00:00:01 → Sunday 23:59:59 prior week (RJR week = Mon–Sun, unlike Altria's Sun–Sat)
+
+**Circana Onboarding — 4 Stages:**
+1. **Enrollment** — Retailer enrolled, sFTP credentials provided. PAR gets sFTP access.
+2. **Testing** — PAR submits test files to `/Onboarding_Validation/` folder. Circana checks formatting. Resubmit corrections.
+3. **Certification** — PAR submits at least **2 consecutive weeks** of production-format data. Circana detailed review.
+4. **Production** — Circana notifies to move to Production folder. Live submissions begin.
+
+**Non-compliance consequence:** Consistent missed deadlines may result in loss of RSD Program benefits AND Digital Partnership Program Level 2 status.
+
+**34 Key Fields (selected highlights):**
+- Field 8: Transaction Date/Time
+- Field 9: Market Basket ID (repeated for each tobacco item in same basket)
+- Field 10: Scan ID (unique per scanned item)
+- Field 17: Promotion Flag (Y/N)
+- Field 23: Manufacturer Discount Amount
+- Field 33: Account Loyalty ID
+
+---
+
+## MSA SCAN DATA — DEEP DIVE
+
+**Program:** RSS (Retailer Scan Solution) Shared File Format. Used by Liggett (Vector Group) and other manufacturers still routing through MSA (Management Science Associates).
+
+**CRITICAL DIFFERENCE: MSA explicitly rejects .zip files. Only .gz or uncompressed plain text are accepted.**
+
+**When it applies:** Always confirm with your manufacturer contact whether MSA or Circana applies — don't assume.
+
+**File Format:**
+- **34 fields** — same field names as Circana RSS
+- Pipe, Comma, or **JSON** formats supported (JSON option unique to MSA)
+- **.zip NOT accepted** — this is the #1 operational difference from Circana
+- Timestamp format: **Field 8 must be `yyyy-mm-dd-hh:mm:ss`** (military time). Example: `2023-03-15-14:32:07`. Not required by Circana.
+- Empty fields must be completely blank — no spaces between delimiters
+
+**Transaction Identity Key (MSA explicitly defines this, Circana does not):**
+The unique combination identifying each record: Transaction Date/Time (F8) + Market Basket ID (F9) + Scan ID (F10) + Register ID (F11) + Outlet Number (F2)
+
+**File Naming:** Coordinate with your MSA program representative at setup.
+**Resubmission filename:** Add `_RESUB` suffix. Example: `Delek20241027_RESUB.txt`
+
+**Submission Deadline:** Every Wednesday by 5:00 PM EST (Mon–Sun data window same as RJR)
+
+**MSA Test folder:** `/<customer_prefix>xfer_test/incoming/` — add `_TEST` to filename before `.txt`
+
+---
+
+## PMI (SFPP) SCAN DATA — NEW OFFERING
+
+**Program:** Smoke-Free Performance Program (SFPP). Philip Morris International U.S. Sales and Distribution Company. PAR Retail's newest scan data submission track.
+
+**Key Admin:**
+- Circana support: PMISFPPHelpDesk@Circana.com
+- Spec version: May 2026
+
+**Products:** IQOS, ZYN-adjacent, and other PMI reduced-risk/nicotine products (not traditional cigarettes).
+
+**File Format:** Identical 34-field Circana RSS schema as RJR. Same pipeline output, different sFTP credentials and destination.
+
+**File Naming:** Same Circana format as RJR: `[SubmitterID]_[YYYYMMDD]_[HH24MM]_[FilePrefix].[ext]`
+
+**Onboarding — 4 Stages with HIGHER BAR than RJR:**
+1. Enrollment → Testing → Certification (2 consecutive weeks) → **Validation (6 consecutive weeks)**
+- RJR requires 2 weeks to Production; PMI requires **6 weeks** to full "validated" status
+- Budget minimum **~8 weeks** from first test file to validated status for new PMI SFPP retailers
+
+**Submission Deadline:** Every Wednesday by 5:00 PM EST
+
+**Why it matters for sales:** PMI is a net-new revenue stream. Retailers participating in PMI's smoke-free product incentives need a compliant submission partner. PAR already has the Circana infrastructure — adding PMI is incremental lift with the same file format.
+
+---
+
+## JUUL SCAN DATA
+
+Keywords: Juul data broker no broker no Circana no MSA direct submission contacts data team onboarding ad-hoc
+
+**Important:** Juul does NOT use Circana or MSA as a data broker. Juul Labs receives scan data directly — no Circana data broker, no MSA data broker — with no third-party data broker intermediary. Juul data broker answer: none. Juul uses direct submission only.
+
+**Program:** Juul Labs receives scan data **directly** — no third-party data broker (no Circana, no MSA).
+
+**File Format:** Identical 34-field Circana RSS format (by convention, no formal requirements doc exists).
+
+**Delivery:** Files transmitted directly to Juul's data team. Coordinate sFTP credentials and destination with Juul contacts — not through a broker.
+
+**Key Contacts:**
+- Primary: data-team@juul.com
+- Lou Stefanski: lou.stefanski@juul.com
+- Jonah: jonah@juul.com
+
+**Deadline:** Wednesday 5:00 PM EST (by convention)
+
+**Onboarding:** Ad-hoc — coordinate directly with Juul data team. No broker validation, no automated rejection email system. Confirm receipt proactively.
+
+**Engineering note:** Same 34-field schema as RJR/PMI — no new field mapping needed. Only the delivery destination changes.
+
+---
+
+## ALTRIA TIER 4 / P+ PROGRAMS — DEEP DIVE
+
+Keywords: Tier 4 tier4 P+ personalization DAF DSF LFP loyalty fund digital accelerator digital store fund DDM digital data metric promotion code field 29 AGDCNow EAIV requirements earn qualify
+
+**What is Tier 4?** Altria's highest reimbursement tier in the 2026 Digital Trade Program (DTP), effective December 28, 2025. PAR Retail is the only loyalty platform with full Tier 4 certification.
+
+**Four requirements for Tier 4 (all four required):**
+1. **P+ API integration** — Personalization Plus real-time offer attribution via AGDC API
+2. **EAIV** — Electronic Age and Identity Verification (Lexis Nexus NOT required; EAIV segmentation alone is acceptable)
+3. **Monthly DDM files** — Digital Data Metric monthly submission with member engagement data
+4. **Digital targeting** — At least one monthly digital communication promoting P+ offers (state/ZIP/purchase history segmentation)
+
+Note: Tier 3 requires only P+ API (1 requirement). Tier 3 gives access to DSF and LFP but not DAF.
+
+**P+ Eligibility:** ~13 weeks of member reporting in scan data is the eligibility runway for personalized offer targeting. Altria segments members by product preference, purchase history, and geography.
+
+**Three Tier 3/4 Incentive Programs (retailer picks the best one per store):**
+
+**DSF — Digital Store Fund**
+- $20/store/month flat fee, no loyalty volume required
+- Most predictable income; best for stores with low loyalty enrollment
+- Available Tier 3+
+
+**LFP — Loyalty Fund Program (Digital LFP Offer)**
+- +$0.10/eligible loyalty transaction on top of base $0.003/tx
+- More loyalty enrollment = more payout; scales with your loyalty program
+- Available Tier 3+; promotion codes from AGDCNow.com each period
+
+**DAF — Digital Accelerator Fund**
+- $0.038/unit sold when the member was actively marketed to AND transacted with an active offer
+- Highest ceiling — best for high-volume P+ retailers with strong segmented marketing
+- **Tier 4 ONLY** — not available to Tier 3
+- $10K/month budget per retailer refreshed by Altria; 50% must go to segmented digital offers
+
+**Tier 4 Math:**
+- DSF annual = (sites × txns × $0.003 + sites × $20) × 12
+- LFP annual = (sites × txns × $0.003 + sites × loyalty_txns × $0.10) × 12
+- DAF annual = (sites × txns × $0.003 + sites × loyalty_txns × 80% × avg_units × $0.038) × 12
+
+**Altria Base Incentive Rates:**
+- Tier 1–2: $0.005/transaction
+- Tier 3–4: $0.003/transaction (lower base, but Tier 3–4 gives access to DSF/LFP/DAF which far exceed the base difference)
+
+**DDM Files (Digital Data Metric):** Monthly reporting for P+ retailers. Includes Activity Log with member interactions: email opens, push notifications, in-app banners. Separate Submitter ID per Dealer/Jobber network. PAR handles DDM file generation and submission as part of the platform.
+
+**LFP Reporting Code requirement:** Exact promotion code from AGDCNow.com must appear in Field 29. Codes are period-specific and must match exactly — no extra characters. Updated each promotion period.
+
+---
+
+## TECHNICAL ARCHITECTURE
+
+Keywords: POS switch change system NCR GK Gilbarco Verifone merchandise codes mapping pipeline ETL ingestion architecture how PAR processes switch pos mid month what happens switching
+
+**How PAR Retail processes scan data:**
+1. **Ingestion:** ETL cron job triggers RabbitMQ messages every 24 hours. Downloads compressed XML TLogs (NAXML/MAXML format) from retailer or PAR SFTP.
+2. **Raw storage:** Files stored in AWS S3 for safekeeping and reprocessing capability.
+3. **Normalization:** Parse XML → JSON, map to DTOs, store in database. Non-normalized fields preserved in raw `element_data` JSON column for traceability.
+4. **Report Generation:** Runs Tuesday night for prior week. 1M+ rows for large retailers (EG America, Chevron EMCS); 5–6 hour automated jobs, CPU/memory intensive.
+5. **Manufacturer submission:** Encrypted scan data files uploaded to manufacturer sFTP on weekly cadence.
+
+**Identifying Tobacco Transactions:**
+- Method A: POS Merchandise Codes (preferred) — dept 200 = cigarettes, dept 300 = OTP (Other Tobacco Products). Clean and unambiguous.
+- Method B: UPC Matching — PAR maintains tobacco UPC database. Only as complete as the retailer-provided list — missing items = missing rebates.
+
+**Loyalty Verification:** Raw SQL query to Activate. Match logic uses Transaction ID + Site ID + 12-hour timestamp window (to handle timezone edge cases). UUID-style identifiers only — no PII sent.
+
+**What happens when a retailer switches POS systems (e.g., NCR to GK):**
+- New POS may use different merchandise codes. PAR's mapping won't recognize the new codes.
+- Stores silently drop from scan data reporting.
+- Fix: Update mapping to new POS merchandise codes or switch to UPC matching. Then resubmit all impacted weeks back to the POS switch date.
+- Catching this quickly is critical — each week of scan data for a large retailer can take hours to rebuild.
+
+---
+
+## MINIMUM TECHNICAL REQUIREMENTS
+
+Keywords: POS system supported version requirements Verifone Gilbarco NCR Tote NAXML MAXML SFTP Axonet connectivity option dealer jobber smaller sites PSPC values 410 419 MAN RCN API consent ODA Engage
+
+Axonet connectivity option: For smaller dealer and jobber sites without direct SFTP capability, PAR supports Axonet as an alternative connectivity method for TLog ingestion. This eliminates the need for a full SFTP server setup at each site.
+
+**Supported POS Systems:**
+| POS Type | Min Version |
+|---|---|
+| Verifone Commander | Base v53+ |
+| Gilbarco Passport | v20+ |
+| NCR Radiant | v1.6.3 |
+| Tote.ai | Supported (special NAXML handling) |
+
+**Required capabilities:** NAXML/MAXML tlog export format, SFTP capability (or Axonet for smaller dealers/jobbers).
+
+**Required data in TLogs:** Transaction ID, 12-digit UPC, Quantity, Final price, Loyalty/Member ID, Date/time, Store ID.
+
+**Required manufacturer identifiers:**
+- Altria: Management Account Number (MAN) + Retail Control Number (RCN)
+- RJR: L1 Account Number (RMSC Account Number)
+- API Consent — ODA for Altria, Engage portal for RJR (not required at launch but critical for P+/Tier 4)
+
+**PSPC Values (Product Scan Price Category):** Values 410–419 required for tobacco loyalty transactions in POS. On Gilbarco Passport: must be set in local PLU (not back-office). Common onboarding failure point.
+
+**T-log file arrival SLA:** Must arrive at PAR Retail SFTP within **3 calendar days** of the transaction date to be included in the current week's submission.
+
+---
+
+## ONBOARDING PROCESS — Typical 4–8 Weeks to Production
+
+**Roles:**
+| Party | Key Responsibilities |
+|---|---|
+| Account Manager | Customer communication, program changes, escalations |
+| PAR Retail (Platform) | Ingest, validate, deduplicate, generate, submit, monitor |
+| Manufacturer (Altria/RJR) | Define format requirements, approve programs, fund payouts |
+| POS/Back-Office Vendor | POS config, PLU/price book accuracy, tlog format compatibility |
+
+**Phase-by-Phase:**
+
+**Phase 1 — Discovery & Agreements**
+- Retailer executes PAR Retail Scan Data agreement
+- Provide full site list (Site IDs, addresses, POS vendor per site)
+- Confirm manufacturer program enrollment (Altria AGDC, RJR, etc.)
+- PAR confirms applicable manufacturers and program types
+
+**Phase 2 — Technical Setup**
+- POS connected to PAR Retail SFTP (credentials provided by PAR)
+- TLog format confirmed (NAXML or POS-vendor-specific, reviewed with PAR)
+- Sample TLog files received and validated from all sites
+- Site ID mapping cross-referenced to retailer's internal store numbers
+- UPC/SKU catalog reviewed — tobacco items verified with correct UPCs
+
+**Phase 3 — Tobacco Loyalty Setup (P+ Retailers Only)**
+- Retailer enrolled in Altria P+ program via AGDC
+- PAR loyalty broker integration confirmed (Conexxus host interface)
+- Member enrollment flow tested end-to-end
+- PSPC values validated for all tobacco PLUs
+- Altria DDM campaign configuration verified
+
+**Phase 4 — Parallel Run & Go-Live**
+- 2-week parallel submission (shadow mode, no funds impacted)
+- Retailer reviews sample submission report and confirms accuracy
+- PAR submits first live scan data file
+- Manufacturer acknowledgment received (typically 48–72 hours)
+- 3rd-party switch: dealer emails Circana/MSA to process provider switch (must be ~3 weeks from go-live date)
+
+**Timeline by CPG:**
+- RJR/Circana: ~2 weeks to Production after first test file
+- PMI/Circana SFPP: ~8 weeks to Validated status (6 consecutive validation weeks)
+- Altria AGDC: Single first-file Help Desk approval, then production begins
+
+**Common question: "How long does onboarding take?"** → Typically 4–8 weeks depending on POS readiness and retailer responsiveness. POS configuration issues (PSPC values, UPC tables) are the most common cause of delays.
+
+**3rd Party Switch Process:** If the retailer was previously self-submitting or using another provider, they must email Circana/MSA to notify of provider switch. This should be completed ~3 weeks from go-live. Until the switch is processed, the old provider may still be submitting (duplicates possible).
+
+---
+
+## RESUBMISSION PROCESS
+
+**When resubmissions occur:**
+- Manufacturer rejection of an original submission
+- Missing TLog files discovered after submission window
+- Systematic data error affecting multiple weeks
+- Retailer request to correct historical data impacting reimbursements
+
+**Resubmission SLAs:**
+| Scenario | Typical Turnaround |
+|---|---|
+| Manufacturer rejection (format error) | 3–5 business days |
+| Missing files (retailer provides corrected data) | 2–3 business days after files received |
+| Systematic data correction (multi-week) | 5–10 business days |
+
+**Resubmission filename conventions by CPG:**
+| CPG | Original | Resubmission |
+|---|---|---|
+| Altria | `Delek20241026.txt` | `Delek20241026v2.txt` (add version suffix) |
+| RJR (Circana) | `823720_20241120_0000_SOUTHWESTCONVHQ.txt` | Same filename (overwrites). Only alter time if truly needed. |
+| MSA | `Delek20241027.txt` | `Delek20241027_RESUB.txt` (add _RESUB suffix) |
+
+**Important:** Resubmission acceptance is at the manufacturer's discretion. PAR advocates on your behalf but cannot guarantee out-of-window acceptance. Root cause must be fixed before resubmission.
+
+---
+
+## WEEKLY OPERATIONS WORKFLOW
+
+Keywords: weekly submission deadline schedule cadence when submit submission deadline day calendar workflow operations submission deadline Wednesday 5PM EST
+
+**Weekly cadence:**
+| Day | Task |
+|---|---|
+| Mon PM / Tue AM | Validate customer SFTPs — no backlog. Rename EGA folders before 6PM ET. |
+| Tuesday PM | Confirm SFTP processing complete; manually trigger generation where needed |
+| Wednesday AM | Validate report files; run report scripts |
+| **Wed before 5 PM** | **HARD DEADLINE — upload to Altria/RJR SFTPs. Late = no reimbursement for that week.** |
+| Thursday AM | Send EMCS SPIN reports to RJR; generate and send weekly customer reports by 5PM ET |
+
+**CPG Data Windows:**
+- **Altria:** Sunday 00:00:01 → Saturday 23:59:59
+- **RJR (Circana):** Monday 00:00:01 → Sunday 23:59:59
+
+**Test/Onboarding SFTP folders:**
+- Altria AGDC: `/incoming/qa/`
+- Circana (RJR/PMI): `/Onboarding_Validation/`
+- MSA: `/<customer_prefix>xfer_test/incoming/` (add `_TEST` to filename)
+
+---
+
+## COMMON ERRORS & TRIAGE
+
+Keywords: error rejected rejection file reject Circana reject file MSA AGDC troubleshoot triage diagnose fix problem issue missing store coverage escalation why rejected invalid
+
+**Error Cheat Sheet:**
+| Error | Origin | What It Usually Means | Fix |
+|---|---|---|---|
+| Invalid Discount | POS/Activate | Offer discount configured incorrectly | Correct offer config in Command Center |
+| Missing Stores | SFTP | Store/day missing from inbound data | Retailer/POS not sending files |
+| No Election | Altria/RJR | Store not enrolled/elected for that program | Enroll store at manufacturer portal |
+| Incorrect Reporting Code | Activate | Campaign missing External ID | Add External ID to campaign in Command Center |
+| Missing "Y" Indicator | TLogs | Multi-unit flag malformed or bad UPC-to-PLU reference | Fix POS discount config or UPC table |
+| Invalid UPC | TLogs | Leading-zero formatting mismatch or SKU instead of UPC | Correct PLU table; ensure 12-digit UPC |
+| Null/Invalid PSPC | POS Config | PLU price book not configured for tobacco loyalty items | Fix in Gilbarco local PLU (not back-office) |
+| Loyalty Mismatch (P+) | ETL | Member segments out of sync | PAR Engineering triage |
+
+**Error Detection Stages:**
+1. **Ingest:** Missing files, malformed TLog format, duplicate transactions, unrecognized Site IDs
+2. **Pre-Submission:** Unmatched UPCs, missing PSPC values, loyalty discount mismatches
+3. **Post-Submission:** Manufacturer ACK failure, formatting errors flagged by manufacturer
+
+**Escalation Tiers:**
+- **Keep at Support Specialist** when: retailer setup/config problem; errors match DB contents; known error pattern
+- **Escalate to Scan Data Engineer** when: POS correct but data not appearing; multiple locations affected; scan data in DB but not reaching manufacturer; transaction reconciliation errors
+- **Escalate to Back-End Engineering** when: root cause confirmed and a code change is required (create OCST Jira ticket first)
+
+---
+
+## JBF + RJR JOINT FUNDING — CAMPAIGN CONFIGURATION
+
+When an offer is funded by both an **RJR Promotion Code** and a **JBF (Joint Business Funding)** tag, both must appear on the same transaction line in Scan Data. Configuration is in Command Center Campaign External ID.
+
+**External ID Format:**
+| Funding Type | External ID Format | Example |
+|---|---|---|
+| RJR only | RJR Promotion Code alone | `40201` |
+| RJR + JBF | RJR Code + space + JBF tag | `40201 JBF` |
+
+**Rules:**
+- Separator must be a **single space** — no commas, slashes, or other characters
+- Only include JBF tag when the offer is explicitly JBF-funded
+- Group all offers sharing the same RJR Promotion Code + JBF tag under one campaign
+- Never leave External ID blank for an RJR-funded offer — it won't report any funding identifier
+
+**Impact of misconfiguration:** JBF funding not reported (missed reimbursement), RJR Promotion Code absent from submission (rejection), or incorrect attribution requiring manual correction/resubmission.
+
+---
+
+## COCO VS. DEALER/JOBBER
+
+**COCO (Company Owned, Company Operated):**
+- Brand corporate owns land and store; corporate employees run operations
+- Strict corporate guidelines; centralized IT; faster bulk onboarding
+- One enterprise decision-maker; standard POS across fleet
+
+**Dealer:**
+- Independent franchisee. "Rents the sign" (brand/fuel) but owns the business (store, land, in-store profit)
+- Licenses fuel brand/canopy; chooses their own tech and partners
+- More tech variance, more onboarding variability, more operational dependencies
+
+**Jobber:**
+- Wholesaler who owns multiple dealer stores; the Jobber IS the decision-maker for the group
+- Work through the Jobber, not individual dealers
+- Scan data submissions typically need separate Submitter IDs per Jobber for DDM files
+
+**Mental Model ("Dirt and Dirt" rule):** Dealers own the land and the business, even if they "rent" the brand name. They have full autonomy over which loyalty and scan data platform they use.
+
+---
+
+## CURRENT PAR RETAIL CUSTOMERS & ACCOUNT INFO
+
+**Active customers (with known Altria MAN numbers):**
+| Customer | Altria MAN | Circana Submitter ID | MSA Submitter ID |
+|---|---|---|---|
+| Delek | 70948 | 823720 | — |
+| EG America | 26142 | B42916 | 10021677 |
+| Extra Mile (EMCS/Chevron) | 68418 | B40269 | 10380697 |
+| Hucks | 36376 | 553414 | — |
+| Marathon (Sane Holtz) | 53447 | C60980 | 10848746 |
+| Parkers | 49394 | 972757 | — |
+| Raceway | 79170 | B64880 | — |
+| Refuel | 76353 | 238919 | 10363297 |
+| Royal Farms | 15512 | 561037 | — |
+| Yesway | 72605 | A29297 | 10068209 |
+
+**Other customers:** Jacksons, Dash In, H&S Energy, Stinker, DK/Oxxo, Caseys (onboarding), Gulf, Bolla, Circle K.
+
+**File name examples:**
+- Altria: `ExtraMileConvenienceStoresLLC20241123.txt`
+- Circana: `B40269_20241120_1200_ExtraMileConvenience.txt`
+- MSA: `M000967_20241120_0000_ExtraMile.txt`
+
+---
+
+## FAQs — REAL QUESTIONS FROM THE FIELD
+
+**Q: We use MarketLink. With your platform, will we still get the market basket data we need for Tobacco Scan Data reporting?**
+A: Yes — and this is actually better than the Excentus model. With Excentus, MarketLink sourced loyalty data separately and combined it with TLog data. With PAR Retail, we already do all of that for you. We ingest raw TLogs from the POS, enrich with loyalty data from Activate (member ID matching, offer/discount details), and produce the complete submission-ready file. MarketLink no longer needs to concatenate loyalty data separately — it's already baked into what we produce.
+
+**Q: What happens to resubmitted lines that contain negative values? Will RJR still pay on them?**
+A: This is a known issue. Circana removes any rows with negative values from reporting before they reach RJR — meaning RJR may never see those lines. Reimbursement on negative-value lines should not be assumed until resolved with RJR's account manager directly. The path forward requires a direct conversation with RJR about whether workarounds exist.
+
+**Q: A retailer's reimbursement is lower than expected. Our submitted number and theirs are close, but Altria paid out far less. Who's responsible?**
+A: PAR controls what we submit — Altria controls what they pay. Common causes of gaps: (1) Outlet-funded offers were running — those lines are not eligible for manufacturer reimbursement and can account for a large portion of the gap. You must isolate manufacturer-eligible offers. (2) UPC eligibility — Altria may reduce payment on UPCs that don't match their eligible product list. (3) File-level vs. line-level discrepancies. Best approach: cross-reference our submitted numbers against what Altria shows received, isolate outlet-funded lines, then escalate to a joint review session with PAR + retailer + Altria rep if numbers still don't reconcile.
+
+**Q: The retailer switched from NCR to GK POS. Now their stores aren't reporting correctly in Scan Data. What happened?**
+A: Classic POS switch failure. PAR identifies tobacco transactions using merchandise codes (preferred) or UPC matching (fallback). When POS changes, the new system may use different merchandise codes — or none at all. PAR's mapping won't recognize the new codes, so those stores silently drop from reporting. Fix: update the merchandise code mapping for the affected stores, identify the full affected date range, and resubmit all impacted weeks back to the POS switch date. The longer it goes undetected, the more weeks to rebuild — each week for a large retailer can take hours.
+
+**Q: Is a loyalty program required to submit scan data?**
+A: Not always — it depends on the manufacturer program and what offer types are active. Multi-unit (MU) offers don't require a loyalty program. However, Loyalty (Everyday Value) offers and P+ require loyalty enrollment. For maximum reimbursement, loyalty participation is strongly recommended since loyalty transactions generate significantly higher per-transaction values than multi-unit alone.
+
+**Q: What if a store misses a submission week?**
+A: The manufacturer will not reimburse for that period. PAR works with the retailer to resubmit if possible, but acceptance of out-of-window submissions is at the manufacturer's discretion. This is why PAR's proactive Wednesday monitoring is a core part of our value proposition — we catch issues before the deadline, not after.
+
+---
+
+## PAR RETAIL COMPETITIVE DIFFERENTIATORS
+
+Keywords: compare comparison competitor old provider switch advantage differentiator why PAR better alternative vs versus legacy
+
+1. **Tier 4 exclusivity** — PAR is the only Altria Tier 4 certified loyalty platform. No Tier 4 = no DAF, no DSF, no Digital LFP program access. Competitors stuck at Tier 1–2 are leaving real money on the table every month.
+2. **95% pass-through vs 80% industry** — The 15-point gap is direct cash every week. At $299/store/week, that 15 points is ~$45/store/week or ~$2,300/store/year.
+3. **Pre-submission error correction** — PAR catches errors before Circana/AGDC sees them. Post-broker rejection = that week's reimbursement is gone. No second chances.
+4. **Loyalty fusion quality** — Full member-level loyalty fusion in real-time (<100ms at POS). PAR's loyalty platform drives 38% take rate vs 18% industry because offers are better-targeted and enrollment is frictionless.
+5. **End-to-end platform** — Loyalty host (Activate) + scan data submission + manufacturer APIs (Altria P+, RJR) in one platform. Competitors that are loyalty-only or scan-data-only can't fuse the data accurately.
+6. **Scale and reliability** — 1M+ row files, 5–6 hour automated jobs run reliably every week for retailers like EG America and Chevron.
+7. **Multi-manufacturer** — Altria + RJR + MSA + PMI + Juul from a single platform.
+8. **True-up and back-data recovery** — When a retailer switches to PAR from another provider, PAR can resubmit historical data to recover missed rebates during the transition period.
+
+**Handling Common Objections:**
+- *"We already have a scan data provider"* → True-up is available. PAR can resubmit historical data to recover missed rebates during transition. Ask: "Are you at Tier 4 today? Do you know your current pass-through rate?"
+- *"The setup seems complex"* → Structured 4–8 week process with dedicated Scan Data Engineering support. Most retailers are live within 6 weeks.
+- *"What about missed deadlines?"* → PAR monitors every week with internal alerts before the Wednesday 5PM EST cutoff. You receive a weekly report confirming submission status.
+- *"Our POS is old"* → Verifone v53+, Gilbarco v20+, NCR 1.6.3 are all supported. Flag POS version early in discovery — it's rarely a blocker.
+- *"What does it cost?"* → Per-site monthly fee. Most networks recoup the cost entirely within Q1 from incremental reimbursements. Tier 4 DSF alone ($20/store/month) covers a meaningful portion of platform cost at scale.
+- *"Can you handle dealers and jobbers?"* → Yes. PAR supports Dealer/Jobber networks with separate Submitter IDs, Axonet connectivity for sites without SFTP, and Jobber-level DDM file management.
+
+---
+
+## PAR RETAIL KEY CONTACTS
+
+| Name | Role | Contact |
+|---|---|---|
+| Jeto Fisher | Scan Data Support Engineer | Jeto.Fisher@partech.com |
+| Ben Thorn | Backend Scan Data Engineer | Ben.Thorn@partech.com |
+| Jesse Brooks | Scan Data Product Manager | Jesse.Brooks@partech.com |
+| Scan Data team | General submission issues | scandata@partech.com |
+
+---
+
+## DATA PRIVACY & COMPLIANCE
+
+- Phone numbers resolved to UUIDs — no PII in scan data files
+- Encrypted SFTP to Circana; SOC 2 compliant (NYSE: PAR)
+- All AGDC-submitted data becomes AGDC property; does not prevent retailer's own use of that data
+- CBD products are categorically excluded from scan data files — inclusion risks loss of promotional funds for the affected month
+- Only question text and schema metadata are sent to AI — never raw transaction data
+- All SQL runs locally in DuckDB on the analyst's machine (for the Scan Data Analyst tool)
+
+---
+
+## GLOSSARY
+
+Keywords: acronym abbreviation term definition mean definition means stands meaning stand what PSPC DAF DSF LFP DDM DTP EAIV AGDC ATOC RMSC STARS NAXML OPCO SKUGUID ADID MAN RCN ACK NACK ETL RSS SFPP
+
+DAF means Digital Accelerator Fund — DAF altria program incentive paying $0.038 per marketed unit sold at Tier 4. DAF altria definition meaning. DSF means Digital Store Fund — Altria Tier 3 and Tier 4 flat fee incentive of $20 monthly per outlet. LFP means Loyalty Fund Program — Altria incentive of +$0.10 added per qualifying loyalty transaction. DDM means Digital Data Metric — Altria monthly submission for P+ retailers. DTP means Digital Trade Program — Altria umbrella program name. EAIV means Electronic Age and Identity Verification. PSPC means Product Scan Price Category — POS field values 410 through 419 required for tobacco loyalty discounts. STARS Week means the Altria STARS Week submission reporting period — STARS Week definition: Sunday 00:00:01 through Saturday 23:59:59. The STARS Week is the Altria data window for scan data submissions. STARS Week glossary: Sun-Sat reporting cycle used for Altria weekly scan data files. AGDC means Altria Group Distribution Company. ATOC means Altria Tobacco Operating Companies — includes PM USA Marlboro USSTC Copenhagen Skoal JMC cigars. RMSC means Reynolds Marketing Services Company — RJR entity running retail scan data. NAXML means North American XML standard format for POS transaction log TLog files — NAXML format MAXML format. OPCO means Operating Company — manufacturer brand entity used in DDM configuration. SKUGUID means Altria unique SKU identifier used in manufacturer catalog. ADID means Altria Digital Identifier — unified member identifier for DDM targeting. MAN means Management Account Number — Altria chain identifier. RCN means Retail Control Number — Altria site-level identifier for independents. ACK means Acknowledgment — manufacturer confirmation submission accepted. NACK means Negative Acknowledgment — submission rejected. ETL means Extract Transform Load — PAR automated pipeline for TLog data. RSS means Retailer Scan Solution — MSA shared file format. SFPP means Smoke-Free Performance Program — PMI scan data program via Circana.
+
+| Term | Definition |
+|---|---|
+| ACK / NACK | Acknowledgment / Negative Acknowledgment — manufacturer confirmation that a submission was accepted or rejected |
+| ADID / Tracking ID | Altria Digital Identifier — unified member identifier for DDM campaign targeting |
+| AGDC | Altria Group Distribution Company — the distributor entity managing Altria's scan data program |
+| ATOC | Altria Tobacco Operating Companies — PM USA (Marlboro), USSTC (Copenhagen/Skoal), JMC (cigars), etc. |
+| DAF | Digital Accelerator Fund — Tier 4 Altria incentive; $0.038/marketed unit sold |
+| DDM | Digital Data Metric — Altria's monthly scan data submission for P+ enrolled outlets |
+| DSF | Digital Store Fund — Tier 3/4 Altria incentive; $20/store/month flat |
+| DTP | Digital Trade Program — Altria's umbrella program name for scan data incentives |
+| EAIV | Electronic Age and Identity Verification — one of four Tier 4 requirements |
+| ETL | Extract, Transform, Load — PAR's automated pipeline for TLog data |
+| LFP | Loyalty Fund Program — Tier 3/4 Altria incentive; +$0.10/loyalty transaction |
+| MAN | Management Account Number — Altria's chain identifier |
+| NAXML | North American XML standard for POS transaction log files |
+| OPCO | Operating Company — manufacturer brand entity (e.g., PM USA, USSTC) used in DDM config |
+| P+ | Personalization Plus — Altria's 1-to-1 loyalty offer program via PAR's broker integration |
+| PSPC | Product Scan Price Category — POS field (values 410–419) required for tobacco loyalty discounts |
+| RCN | Retail Control Number — Altria's site-level identifier for independents |
+| RMSC | Reynolds Marketing Services Company — the RJR entity that runs the retail scan data program |
+| RSS | Retailer Scan Solution — MSA's shared file format |
+| SFPP | Smoke-Free Performance Program — PMI's scan data program via Circana |
+| SKUGUID | Altria's unique identifier for tobacco product SKUs used in manufacturer catalog |
+| STARS Week | Altria's submission reporting period (Sun–Sat) |
+| TLog / T-log | Transaction log — item-level POS file containing all purchase records for a given day and site |
+
+---
+You are helping a sales rep on a live call. Be clear, confident, and thorough. Use structure and bullets for easy skimming. When reimbursement numbers appear in context (user may paste calculator results), use the benchmarks and formulas above to explain and validate the math. Always stay grounded in the specifics above — never invent program details.`;
+
+// ─── Chat State ───────────────────────────────────────────────────────────────
+let apiKey = '', messages = [], isLoading = false, kbMode = false;
+
+// ─── Knowledge Base Engine ────────────────────────────────────────────────────
+const KB_SECTIONS = (() => {
+  const parts = SYSTEM_PROMPT.split(/\n## /);
+  return parts.slice(1).map(p => {
+    const nl = p.indexOf('\n');
+    return { title: p.slice(0, nl).trim().replace(/^#+\s*/,''), content: p.slice(nl+1).trim() };
+  });
+})();
+
+const STOP_WORDS = new Set(['a','an','the','is','are','was','were','what','how','when','why','where','who','which','do','does','can','will','would','should','could','if','and','or','but','for','with','about','to','of','in','on','at','by','from','that','this','it','i','we','you','they','be','have','has','had','not','me','my','their','our','your','its','tell','explain','describe','show','give','get','use','work','need','want','know','go','does','did','make','take','help','list','like','also','yes','no']);
+
+function kbTokenize(text) {
+  return text.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(t => t.length > 2 && !STOP_WORDS.has(t));
+}
+
+function kbScore(section, query) {
+  const qToks = kbTokenize(query);
+  const sText = (section.title + ' ' + section.content).toLowerCase();
+  let score = 0;
+  for (const t of qToks) {
+    if (sText.includes(t)) score += 1;
+    if (section.title.toLowerCase().includes(t)) score += 3;
+  }
+  for (let i = 0; i < qToks.length - 1; i++) {
+    if (sText.includes(qToks[i] + ' ' + qToks[i+1])) score += 4;
+  }
+  return score;
+}
+
+const KB_FOLLOWUPS = {
+  'REIMBURSEMENT':    ['How is the 95% pass-through rate achieved?','What drives loyalty take rate differences?','Can you model Tier 4 incentives too?'],
+  'ALTRIA':          ['What is the AGDC submission cap rule?','How does LFP reporting work?','What is the Altria file naming convention?'],
+  'RJR':             ['What is the onboarding process with Circana?','How does RJR compare to Altria on deadlines?','What are the 34 RJR file fields?'],
+  'MSA':             ['Why does MSA reject .zip files?','Which manufacturers still use MSA?','How is the timestamp format different from Circana?'],
+  'PMI':             ['How long does PMI SFPP onboarding take?','Is PMI SFPP the same file format as RJR?','What products does PMI SFPP cover?'],
+  'JUUL':            ['How does Juul submission differ from RJR?','Who do I contact at Juul for onboarding?','Does Juul have formal file requirements?'],
+  'TIER 4':          ['What is the difference between DSF, LFP, and DAF?','Does my retailer qualify for Tier 4 today?','How do I calculate DAF annual payout?'],
+  'ONBOARDING':      ['What POS systems are supported?','How does the 3rd-party switch work?','What data is needed to start onboarding?'],
+  'TECHNICAL':       ['What PSPC values are needed for Gilbarco Passport?','What happens when a retailer switches POS systems?','Does PAR support Dealer/Jobber SFTP?'],
+  'COMMON ERRORS':   ['How do I fix a "No Election" error?','What causes missing store coverage?','How does the escalation path work?'],
+  'JBF':             ['Where do I enter the External ID in Command Center?','What if I leave the External ID blank?','Can one campaign have multiple RJR codes?'],
+  'COMPETITIVE':     ['What is the real cost of lower pass-through?','How does PAR handle resubmissions?','Can PAR recover missed rebates from prior provider?'],
+  'COCO':            ['Do dealers need separate Submitter IDs?','How does Jobber onboarding differ from COCO?','Who signs the manufacturer agreements for dealers?'],
+  'WHAT IS SCAN DATA': ['What is the weekly submission deadline?','What is a pass-through rate?','Which manufacturers pay scan data incentives?'],
+  'RESUBMISSION':    ['How far back can resubmissions go?','What are resubmission filename conventions?','Does the manufacturer always accept resubmissions?'],
+  'FAQ':             ['What is the MarketLink replacement?','Why do negative-value lines get removed by Circana?','What causes a reimbursement gap?'],
+  'GLOSSARY':        ['What does PSPC mean?','What is the STARS Week?','What is the difference between ACK and NACK?'],
+};
+
+function kbGetFollowups(title) {
+  const t = title.toUpperCase();
+  for (const [key, fus] of Object.entries(KB_FOLLOWUPS)) {
+    if (t.includes(key)) return fus;
+  }
+  return ['How does PAR Retail compare to legacy providers?','What is the Altria Tier 4 program?','How long does onboarding typically take?'];
+}
+
+function kbQuery(query) {
+  const scored = KB_SECTIONS.map(s => ({ ...s, score: kbScore(s, query) }))
+                             .filter(s => s.score > 0)
+                             .sort((a, b) => b.score - a.score);
+  if (!scored.length) {
+    return {
+      text: "I couldn't find a specific match in the knowledge base for that question. Try rephrasing, or check the quick-topic buttons above.",
+      fus: ['What is Scan Data?','How does onboarding work?','What is Tier 4?']
+    };
+  }
+  const top = scored[0];
+  const second = scored[1] && scored[1].score >= Math.max(2, top.score * 0.5) ? scored[1] : null;
+  let text = `**${top.title}**\n\n${top.content}`;
+  if (second) text += `\n\n---\n\n**Also relevant — ${second.title}**\n\n${second.content.split('\n').slice(0,12).join('\n')}`;
+  return { text, fus: kbGetFollowups(top.title) };
+}
+
+// ─── Mode Management ──────────────────────────────────────────────────────────
+function enterKbMode() {
+  kbMode = true; apiKey = '';
+  localStorage.setItem('par_scan_mode', 'kb');
+  showChat();
+}
+
+function toggleMode() {
+  if (apiKey) {
+    // Currently in AI mode — offer to clear key
+    if (confirm('Remove API key and switch to Knowledge Base mode?')) {
+      localStorage.removeItem('par_scan_api_key');
+      localStorage.setItem('par_scan_mode', 'kb');
+      apiKey = ''; kbMode = true; messages = [];
+      updateModeUI();
+    }
+  } else {
+    // Currently in KB mode — show key entry
+    kbMode = false;
+    document.getElementById('api-screen').style.display = 'flex';
+    document.getElementById('chat-screen').classList.remove('visible');
+  }
+}
+
+function updateModeUI() {
+  const btn = document.getElementById('mode-btn');
+  const lbl = document.getElementById('status-label');
+  const dot = document.getElementById('status-dot');
+  if (apiKey) {
+    btn.textContent = '🤖 AI Mode';
+    btn.classList.add('on');
+    lbl.textContent = 'AI Ready';
+    dot.style.background = 'var(--alt-ok)';
+  } else {
+    btn.textContent = '📚 KB Mode';
+    btn.classList.remove('on');
+    lbl.textContent = 'KB Ready';
+    dot.style.background = 'var(--par-2)';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedKey  = localStorage.getItem('par_scan_api_key');
+  const savedMode = localStorage.getItem('par_scan_mode');
+  if (savedKey) { apiKey = savedKey; kbMode = false; showChat(); }
+  else if (savedMode === 'kb') { kbMode = true; showChat(); }
+  updateCalc();
+});
+
+function saveKey() {
+  const input = document.getElementById('api-key-input');
+  const err   = document.getElementById('api-error');
+  const val   = input.value.trim();
+  if (!val.startsWith('sk-ant-')) { err.textContent = 'Key should start with sk-ant-…'; return; }
+  apiKey = val; kbMode = false;
+  localStorage.setItem('par_scan_api_key', val);
+  localStorage.setItem('par_scan_mode', 'ai');
+  showChat();
+}
+
+function resetKey() {
+  localStorage.removeItem('par_scan_api_key');
+  localStorage.setItem('par_scan_mode', 'kb');
+  apiKey = ''; kbMode = true; messages = [];
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-error').textContent = '';
+  showChat();
+}
+
+function showChat() {
+  document.getElementById('api-screen').style.display = 'none';
+  document.getElementById('chat-screen').classList.add('visible');
+  document.getElementById('user-input').focus();
+  updateModeUI();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
+function ask(q) { document.getElementById('user-input').value = q; sendMessage(); }
+
+function clearChat() {
+  messages = [];
+  const modeNote = apiKey
+    ? '<span style="font-size:.65rem;color:var(--alt-ok);font-weight:700">🤖 AI Mode active</span>'
+    : '<span style="font-size:.65rem;color:var(--par-2);font-weight:700">📚 Knowledge Base Mode — <span style="font-weight:400;color:var(--txt-d)">click <strong>📚 KB Mode</strong> in header to add an API key</span></span>';
+  document.getElementById('messages').innerHTML = `
+    <div class="msg"><div class="avatar ai">SD</div><div class="bubble ai">
+      <div class="welcome">
+        <h2>Scan Data Expert — Ready for your call</h2>
+        <p>${modeNote}<br>Ask anything about PAR Retail's Scan Data programs, or open <strong>💰 Estimator</strong> to run live reimbursement math.</p>
+        <div class="fu-label" style="margin-bottom:5px">Jump in:</div>
+        <div class="welcome-chips">
+          <button class="w-chip" onclick="ask('What exactly is Scan Data and how does it benefit a retailer financially?')">💰 Retailer ROI</button>
+          <button class="w-chip" onclick="ask('How long does onboarding take from start to live?')">⏱ Timeline</button>
+          <button class="w-chip" onclick="ask('How is PAR Retail different from a legacy scan data provider?')">🆚 PAR vs. legacy</button>
+        </div>
+      </div>
+    </div></div>`;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text  = input.value.trim();
+  if (!text || isLoading) return;
+  input.value = ''; input.style.height = 'auto';
+
+  addMessage('user', text);
+  setLoading(true);
+
+  if (!apiKey || kbMode) {
+    // ── KB Mode: instant local search ──────────────────────────────────────
+    const tid = addTyping();
+    await new Promise(r => setTimeout(r, 200)); // tiny delay for UX feel
+    removeTyping(tid);
+    const { text: answer, fus } = kbQuery(text);
+    addMessage('kb', answer, fus);
+    setLoading(false);
+    return;
+  }
+
+  // ── AI Mode: Claude API ────────────────────────────────────────────────────
+  messages.push({ role: 'user', content: text });
+  const tid = addTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6', max_tokens: 1600,
+        system: SYSTEM_PROMPT, messages
+      })
+    });
+    removeTyping(tid);
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      addMessage('ai', `⚠️ API error: ${e?.error?.message || 'HTTP ' + res.status}`, []);
+      setLoading(false); return;
+    }
+    const data = await res.json();
+    const raw  = data.content?.[0]?.text || '';
+    const fuM  = raw.match(/FOLLOWUPS:\[(.+?)\]\s*$/s);
+    let clean  = raw, fus = [];
+    if (fuM) { clean = raw.replace(/\nFOLLOWUPS:\[.+?\]\s*$/s,'').trim(); try { fus = JSON.parse('['+fuM[1]+']'); } catch(e){} }
+    messages.push({ role: 'assistant', content: raw });
+    addMessage('ai', clean, fus);
+  } catch (err) {
+    removeTyping(tid);
+    addMessage('ai', `⚠️ Network error: ${err.message}`, []);
+  }
+  setLoading(false);
+}
+
+function setLoading(val) {
+  isLoading = val;
+  document.getElementById('send-btn').disabled = val;
+  const dot = document.getElementById('status-dot');
+  const lbl = document.getElementById('status-label');
+  if (val) {
+    dot.style.background = '#F8931C';
+    dot.style.animation  = 'none';
+    lbl.textContent      = kbMode ? 'Searching…' : 'Thinking…';
+  } else {
+    updateModeUI();
+  }
+}
+
+let _tc = 0;
+function addTyping() {
+  const id = 'typ-'+(++_tc);
+  const c  = document.getElementById('messages');
+  const d  = document.createElement('div'); d.className = 'msg'; d.id = id;
+  d.innerHTML = `<div class="avatar ai">SD</div><div class="bubble ai"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d); d.scrollIntoView({behavior:'smooth',block:'end'}); return id;
+}
+function removeTyping(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+function addMessage(role, text, fus = []) {
+  const c  = document.getElementById('messages');
+  const d  = document.createElement('div');
+  const isUser = role === 'user';
+  const isKb   = role === 'kb';
+  d.className  = 'msg' + (isUser ? ' user' : '');
+  const av = isUser
+    ? `<div class="avatar user-av">You</div>`
+    : `<div class="avatar ai" style="${isKb?'background:rgba(140,159,255,.18);color:var(--par-2);border:1px solid var(--par-2)':''}">SD</div>`;
+  const body    = !isUser ? renderMd(text) : esc(text);
+  const badge   = isKb ? `<span style="font-size:.58rem;font-weight:700;letter-spacing:.05em;color:var(--par-2);background:rgba(140,159,255,.12);border:1px solid rgba(140,159,255,.3);border-radius:3px;padding:1px 6px;margin-bottom:6px;display:inline-block;">📚 KNOWLEDGE BASE</span><br>` : '';
+  const copyBtn = !isUser ? `<button class="copy-btn" onclick="copyText(this)">Copy</button>` : '';
+  let fuHtml = '';
+  if (fus.length) fuHtml = `<div class="followups"><div class="fu-label">You might also ask:</div>${fus.map(q=>`<button class="fu-chip" onclick="ask(${JSON.stringify(q)})">${esc(q)}</button>`).join('')}</div>`;
+  const bubbleCls = isUser ? 'bubble user' : 'bubble ai';
+  const bubbleStyle = isKb ? 'border-color:rgba(140,159,255,.2)' : '';
+  d.innerHTML = `${av}<div class="${bubbleCls}"${bubbleStyle?' style="'+bubbleStyle+'"':''}>${copyBtn}${badge}${body}${fuHtml}</div>`;
+  c.appendChild(d); d.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+function copyText(btn) {
+  const t = btn.closest('.bubble').innerText.replace(/^Copy\n/,'').replace(/\nYou might also ask:[\s\S]*$/,'');
+  navigator.clipboard.writeText(t).then(() => { btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy',1500); });
+}
+
+function renderMd(text) {
+  let h = esc(text);
+  h = h.replace(/^(\|.+\|)\n(\|[-| :]+\|)\n((?:\|.+\|\n?)*)/gm, (_,hdr,sep,body) => {
+    const ths = hdr.split('|').filter(c=>c.trim()).map(c=>`<th>${c.trim()}</th>`).join('');
+    const trs = body.trim().split('\n').map(r=>`<tr>${r.split('|').filter(c=>c.trim()).map(c=>`<td>${c.trim()}</td>`).join('')}</tr>`).join('');
+    return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  });
+  h = h.replace(/^#### (.+)$/gm,'<h4>$1</h4>').replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h = h.replace(/`(.+?)`/g,'<code>$1</code>').replace(/^---$/gm,'<hr>');
+  h = h.replace(/((?:^[ ]*[-*+] .+\n?)+)/gm, b=>`<ul>${b.trim().split('\n').map(l=>{const m=l.match(/^[ ]*[-*+] (.+)/);return m?`<li>${m[1]}</li>`:''}).join('')}</ul>`);
+  h = h.replace(/((?:^\d+\. .+\n?)+)/gm, b=>`<ol>${b.trim().split('\n').map(l=>{const m=l.match(/^\d+\. (.+)/);return m?`<li>${m[1]}</li>`:''}).join('')}</ol>`);
+  h = h.split(/\n\n+/).map(p=>{p=p.trim();if(!p)return '';if(/^<(h[1-6]|ul|ol|table|hr)/.test(p))return p;return `<p>${p.replace(/\n/g,'<br>')}</p>`;}).join('\n');
+  return h;
+}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const k = document.getElementById('api-key-input');
+  if (k) k.addEventListener('keydown', e => { if(e.key==='Enter') saveKey(); });
+});
+</script>
+</body>
+</html>
