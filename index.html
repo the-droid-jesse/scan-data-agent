@@ -368,6 +368,35 @@ input[type=range]::-webkit-slider-thumb {
 }
 .calc-action-btn:hover { background: rgba(140,159,255,.2); border-color: var(--par-2); color: #fff; }
 
+/* ── Password gate ── */
+#pw-screen {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+}
+.pw-card {
+  background: var(--bg-card); border: 1px solid var(--brd); border-radius: var(--rl);
+  padding: 40px 36px; width: 100%; max-width: 360px; text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,.08);
+}
+.pw-card img { height: 32px; margin-bottom: 20px; }
+.pw-card h2 { font-size: 1rem; font-weight: 800; color: var(--txt); margin-bottom: 6px; }
+.pw-card p { font-size: .78rem; color: var(--txt-d); margin-bottom: 20px; line-height: 1.5; }
+.pw-input {
+  width: 100%; padding: 10px 13px; border: 1px solid var(--brd-l);
+  border-radius: var(--r); font-size: .88rem; font-family: var(--f);
+  background: var(--bg); color: var(--txt); outline: none;
+  transition: border-color .15s; text-align: center; letter-spacing: .12em;
+  margin-bottom: 10px;
+}
+.pw-input:focus { border-color: var(--par-2); }
+.pw-btn {
+  width: 100%; padding: 10px; background: var(--par-1); color: #fff;
+  border-radius: var(--r); font-size: .85rem; font-weight: 700;
+  cursor: pointer; border: none; font-family: var(--f); transition: opacity .15s;
+}
+.pw-btn:hover { opacity: .88; }
+.pw-error { font-size: .73rem; color: var(--alt-err); margin-top: 8px; min-height: 18px; }
+
 /* Tier 4 */
 .t4-row { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
 .t4-row-label { font-size: .77rem; font-weight: 700; color: var(--txt); }
