@@ -1492,38 +1492,45 @@ function kbGetFollowups(title) {
   return ['How does PAR Retail compare to legacy providers?','What is the Altria Tier 4 program?','How long does onboarding typically take?'];
 }
 
+function kbSummary(content, maxLines) {
+  // Pull first N meaningful lines, skipping Keywords lines, blank lines, and dividers
+  const out = [];
+  for (const line of content.split('\n')) {
+    if (out.length >= maxLines) break;
+    const t = line.trim();
+    if (!t || t === '---' || t.startsWith('Keywords:')) continue;
+    out.push(t);
+  }
+  return out.join('\n');
+}
+
 function kbQuery(query) {
   const scored = KB_SECTIONS.map(s => ({ ...s, score: kbScore(s, query) }))
                              .filter(s => s.score > 0)
                              .sort((a, b) => b.score - a.score);
   if (!scored.length) {
     return {
-      text: "I couldn't find a specific match in the knowledge base for that question. Try rephrasing, or check the quick-topic buttons above.",
+      html: '<p>I couldn\'t find a specific match in the knowledge base for that question. Try rephrasing, or check the quick-topic buttons above.</p>',
       fus: ['What is Scan Data?','How does onboarding work?','What is Tier 4?']
     };
   }
+
   const top = scored[0];
-
-  // Multi-vendor detection: 3+ sections score competitively → surface all of them
   const minScore = Math.max(2, top.score * 0.35);
-  const competitive = scored.filter(s => s.score >= minScore);
+  const competitive = scored.filter(s => s.score >= minScore).slice(0, 6);
 
-  let text;
-  if (competitive.length >= 3) {
-    // Show first section in full; subsequent sections get a 30-line preview each
-    text = competitive.slice(0, 6).map((s, i) => {
-      const hdr = i === 0 ? `**${s.title}**` : `---\n\n**${s.title}**`;
-      const lines = s.content.split('\n');
-      const body = i === 0 ? s.content : lines.slice(0, 30).join('\n') + (lines.length > 30 ? '\n\n*…(ask me specifically about this program for the full detail)*' : '');
-      return `${hdr}\n\n${body}`;
-    }).join('\n\n');
-  } else {
-    const second = scored[1] && scored[1].score >= Math.max(2, top.score * 0.5) ? scored[1] : null;
-    text = `**${top.title}**\n\n${top.content}`;
-    if (second) text += `\n\n---\n\n**Also relevant — ${second.title}**\n\n${second.content}`;
-  }
+  // Summary: title + first 6 meaningful lines from top section
+  const summaryHtml = renderMd(`**${top.title}**\n\n${kbSummary(top.content, 6)}`);
 
-  return { text, fus: kbGetFollowups(top.title) };
+  // Expandable detail blocks — one per competitive section
+  const detailsHtml = '<div class="kb-details">' +
+    competitive.map(s => {
+      const cleanContent = s.content.replace(/^Keywords:.*\n?/m, '').trim();
+      return `<details class="kb-expand"><summary>📖 Dive deeper: ${esc(s.title)}</summary><div class="kb-expand-body">${renderMd(cleanContent)}</div></details>`;
+    }).join('') +
+  '</div>';
+
+  return { html: summaryHtml + detailsHtml, fus: kbGetFollowups(top.title) };
 }
 
 // ─── Mode Management ──────────────────────────────────────────────────────────
