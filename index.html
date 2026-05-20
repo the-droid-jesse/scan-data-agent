@@ -1671,29 +1671,34 @@ function kbQuery(query) {
   }
 
   const top = scored[0];
+  const q = query.toLowerCase();
+
+  // ── Priority: pre-written synthesized overview for common question intents ────
+  for (const ov of KB_OVERVIEWS) {
+    if (ov.detect(q)) {
+      // Resolve section keys to actual KB_SECTIONS objects (partial match on title)
+      const ovSections = ov.sectionKeys
+        .map(key => KB_SECTIONS.find(s => s.title.toUpperCase().includes(key.toUpperCase())))
+        .filter(Boolean);
+      // Append any additional scored sections not already included (up to 6 total)
+      const extras = scored.filter(s => !ovSections.find(o => o.title === s.title)).slice(0, 2);
+      const detailSections = [...ovSections, ...extras].slice(0, 6);
+      return {
+        html: renderMd(ov.intro) + buildDetailBlocks(detailSections),
+        fus: kbGetFollowups(top.title)
+      };
+    }
+  }
+
+  // ── Fallback: scored bullet summary ──────────────────────────────────────────
   const minScore = Math.max(2, top.score * 0.35);
   const competitive = scored.filter(s => s.score >= minScore).slice(0, 6);
-
-  // Intro line (contextual, query-aware)
   const intro = kbBuildIntro(query, competitive);
-
-  // Summary bullets — each uses the curated **Summary:** line from the KB section
-  const bullets = competitive.map(s => {
-    const summary = kbGetSummary(s.content);
-    return `- **${s.title}**: ${summary}`;
-  }).join('\n');
-
-  const summaryHtml = renderMd(`${intro}\n\n${bullets}`);
-
-  // Expandable detail blocks — one per competitive section
-  const detailsHtml = '<div class="kb-details">' +
-    competitive.map(s => {
-      const cleanContent = s.content.replace(/^\*\*Summary\*\*:.*\n?/m, '').replace(/^Keywords:.*\n?/m, '').trim();
-      return `<details class="kb-expand"><summary>📖 Dive deeper: ${esc(s.title)}</summary><div class="kb-expand-body">${renderMd(cleanContent)}</div></details>`;
-    }).join('') +
-  '</div>';
-
-  return { html: summaryHtml + detailsHtml, fus: kbGetFollowups(top.title) };
+  const bullets = competitive.map(s => `- **${s.title}**: ${kbGetSummary(s.content)}`).join('\n');
+  return {
+    html: renderMd(`${intro}\n\n${bullets}`) + buildDetailBlocks(competitive),
+    fus: kbGetFollowups(top.title)
+  };
 }
 
 // ─── Mode Management ──────────────────────────────────────────────────────────
