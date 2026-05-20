@@ -1102,6 +1102,8 @@ Note: Tier 3 requires only P+ API (1 requirement). Tier 3 gives access to DSF an
 
 ## TECHNICAL ARCHITECTURE
 
+**Summary:** PAR's ETL pipeline ingests TLog data (NAXML/MAXML XML format) via SFTP from NCR, Gilbarco, Verifone, and GK systems, normalizes to each manufacturer's required file format, and submits automatically. Retailer doesn't touch the files — PAR handles everything end-to-end.
+
 Keywords: POS switch change system NCR GK Gilbarco Verifone merchandise codes mapping pipeline ETL ingestion architecture how PAR processes switch pos mid month what happens switching
 
 **How PAR Retail processes scan data:**
