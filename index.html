@@ -1478,7 +1478,7 @@ function kbQuery(query) {
   const top = scored[0];
   const second = scored[1] && scored[1].score >= Math.max(2, top.score * 0.5) ? scored[1] : null;
   let text = `**${top.title}**\n\n${top.content}`;
-  if (second) text += `\n\n---\n\n**Also relevant — ${second.title}**\n\n${second.content.split('\n').slice(0,12).join('\n')}`;
+  if (second) text += `\n\n---\n\n**Also relevant — ${second.title}**\n\n${second.content}`;
   return { text, fus: kbGetFollowups(top.title) };
 }
 
