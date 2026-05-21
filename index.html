@@ -1959,36 +1959,44 @@ function kbBuildIntro(query, competitive) {
   return `Here's what I found in the knowledge base — expand any section for the full detail:`;
 }
 
+// Minimum score the top result must reach before we attempt to answer.
+// Prevents returning generic content for unrelated questions.
+const KB_MIN_SCORE = 5;
+
 function kbQuery(query) {
   const scored = KB_SECTIONS.map(s => ({ ...s, score: kbScore(s, query) }))
                              .filter(s => s.score > 0)
                              .sort((a, b) => b.score - a.score);
-  if (!scored.length) {
-    return {
-      html: '<p>I couldn\'t find a specific match in the knowledge base for that question. Try rephrasing, or check the quick-topic buttons above.</p>',
-      fus: ['What is Scan Data?','How does onboarding work?','What is Tier 4?']
-    };
-  }
 
-  const top = scored[0];
   const q = query.toLowerCase();
 
   // ── Priority: pre-written synthesized overview for common question intents ────
+  // Check overviews FIRST — they're curated and always authoritative.
   for (const ov of KB_OVERVIEWS) {
     if (ov.detect(q)) {
-      // Resolve section keys to actual KB_SECTIONS objects (partial match on title)
       const ovSections = ov.sectionKeys
         .map(key => KB_SECTIONS.find(s => s.title.toUpperCase().includes(key.toUpperCase())))
         .filter(Boolean);
-      // Append any additional scored sections not already included (up to 6 total)
       const extras = scored.filter(s => !ovSections.find(o => o.title === s.title)).slice(0, 2);
       const detailSections = [...ovSections, ...extras].slice(0, 6);
       return {
         html: renderMd(ov.intro) + buildDetailBlocks(detailSections),
-        fus: kbGetFollowups(top.title)
+        fus: scored.length ? kbGetFollowups(scored[0].title) : kbGetFollowups('')
       };
     }
   }
+
+  // ── No overview matched — check if scored results are relevant enough ─────────
+  // If nothing scored, or the best match is too weak, admit it and suggest AI mode.
+  if (!scored.length || scored[0].score < KB_MIN_SCORE) {
+    const aiHint = `\n\n💡 **For specific questions like this**, switch to **AI Mode** — click the mode button in the header and add your Anthropic API key. AI Mode uses the full knowledge base plus Claude's reasoning to answer detailed questions directly.`;
+    return {
+      html: renderMd(`I don't have a specific answer to that in my knowledge base.\n\nTry one of the topic buttons above, or rephrase your question around a specific program (Altria, RJR, Tier 4, onboarding, errors, etc.).${aiHint}`),
+      fus: ['What is Scan Data?','How does Tier 4 work?','What is the onboarding timeline?','How do reimbursements work?']
+    };
+  }
+
+  const top = scored[0];
 
   // ── Fallback: direct answer for focused queries, bullet list for broad ones ───
   const minScore = Math.max(2, top.score * 0.35);
@@ -2001,9 +2009,13 @@ function kbQuery(query) {
     const secondNote = competitive[1]
       ? `\n\nAlso relevant: **${competitive[1].title}** — ${kbGetSummary(competitive[1].content)}`
       : '';
-    summaryHtml = renderMd(`**${top.title}**\n\n${topSummary}${secondNote}`);
+    // If the top section's summary is thin and score is borderline, suggest AI mode
+    const aiNudge = top.score < 8
+      ? `\n\n💡 *Need more depth? Switch to AI Mode for a fuller answer.*`
+      : '';
+    summaryHtml = renderMd(`**${top.title}**\n\n${topSummary}${secondNote}${aiNudge}`);
   } else {
-    // Broad question — bullet overview of all matched sections
+    // Broad question — bullet overview of matched sections
     const intro = kbBuildIntro(query, competitive);
     const bullets = competitive.map(s => `- **${s.title}**: ${kbGetSummary(s.content)}`).join('\n');
     summaryHtml = renderMd(`${intro}\n\n${bullets}`);
