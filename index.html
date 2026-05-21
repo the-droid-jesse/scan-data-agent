@@ -1946,16 +1946,17 @@ function kbGetSummary(content) {
 function kbBuildIntro(query, competitive) {
   const q = query.toLowerCase();
   const n = competitive.length;
-  if (n === 1) return `Quick overview — tap to expand for the full detail:`;
-  const isVendor  = ['vendor','manufacturer','program','compare','all','support','offer','which'].some(w => q.includes(w));
+  if (n === 1) return `Here's what the knowledge base covers on that — expand for the full detail:`;
+  // Only use the vendor intro when the question is explicitly about which vendors/programs exist
+  const isVendor  = ['what vendor','which vendor','what manufacturer','which manufacturer','all vendor','all program','all manufacturer','what program','which program'].some(w => q.includes(w));
   const isOnboard = ['onboard','setup','start','enroll','begin','timeline','how long','switch'].some(w => q.includes(w));
-  const isError   = ['error','reject','fail','issue','fix','problem','wrong','missing','why'].some(w => q.includes(w));
+  const isError   = ['error','reject','fail','issue','fix','problem','wrong','missing'].some(w => q.includes(w));
   const isMoney   = ['reimburse','payout','money','earn','revenue','how much','cost','worth','pay'].some(w => q.includes(w));
   if (isVendor && n >= 3)  return `PAR Retail supports scan data across **${n} programs** covering all major tobacco manufacturers. Here's the overview — expand any section for full detail:`;
-  if (isOnboard)           return `Here's what's involved across **${n} relevant areas** — expand for full step-by-step:`;
-  if (isError)             return `Found **${n} relevant topics** to help troubleshoot — expand for triage steps:`;
+  if (isOnboard)           return `Here's what's involved — expand any section for step-by-step details:`;
+  if (isError)             return `Here's what the knowledge base covers on that — expand for triage steps and fixes:`;
   if (isMoney)             return `Here's how reimbursements and payouts work — expand any section for the full math:`;
-  return `Found **${n} matching topics** — here's the overview, expand any section for full detail:`;
+  return `Here's what I found in the knowledge base — expand any section for the full detail:`;
 }
 
 function kbQuery(query) {
