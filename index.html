@@ -2143,6 +2143,7 @@ function saveKey() {
   localStorage.setItem('par_scan_api_key', val);
   localStorage.setItem('par_scan_mode', 'ai');
   showChat();
+  updateModeUI();
 }
 
 // ── AI Upgrade Modal (inline switch from KB mode) ─────────────────────────────
