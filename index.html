@@ -1980,8 +1980,19 @@ function kbBuildIntro(query, competitive) {
 }
 
 // Minimum score the top result must reach before we attempt to answer.
-// Prevents returning generic content for unrelated questions.
+// With IDF filtering, "scan"/"data" no longer inflate scores, so 5 is a meaningful bar.
 const KB_MIN_SCORE = 5;
+
+// Patterns that indicate the question requires reasoning/comparison that KB lookup can't do.
+const KB_SYNTHESIS_PATTERNS = [
+  /\bdifference between\b/i,
+  /\bhow does .{3,40} (differ|compare|work compared)\b/i,
+  /\b\w[\w\s]{1,20}\s+vs\.?\s+\w[\w\s]{1,20}\b/i,
+  /\bwhy (is|does|would|should|can)\b/i,
+  /\bwhich (is|should|would) (better|best|preferred|recommended)\b/i,
+  /\bpros? and cons?\b/i,
+  /\bexplain (why|how)\b/i,
+];
 
 function kbQuery(query) {
   const scored = KB_SECTIONS.map(s => ({ ...s, score: kbScore(s, query) }))
