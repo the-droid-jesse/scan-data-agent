@@ -2023,9 +2023,14 @@ function kbQuery(query) {
 
   // Questions that require comparison/reasoning can't be answered by section lookup.
   if (needsSynthesis) {
+    const relatedSections = scored.filter(s => s.score >= KB_MIN_SCORE).slice(0, 4);
+    const detailBlocks = relatedSections.length ? buildDetailBlocks(relatedSections) : '';
+    const relatedNote = relatedSections.length
+      ? `\n\nHere are the most relevant knowledge base sections — expand to find the pieces you need:`
+      : '';
     return {
-      html: renderMd(`That question requires comparing or reasoning across topics — Knowledge Base mode can surface relevant sections but can't synthesize a direct answer for you.\n\nExpand the sections below for the raw detail, or use **AI Mode** for a direct explanation.${aiHint}`),
-      fus: ['What is Scan Data?','How does Tier 4 work?','What is the onboarding timeline?','How do reimbursements work?']
+      html: renderMd(`That question requires comparing or reasoning across topics — Knowledge Base mode can surface relevant sections but can't synthesize a direct answer.\n\nFor a direct explanation, use **AI Mode**.${aiHint}${relatedNote}`) + detailBlocks,
+      fus: relatedSections.length ? kbGetFollowups(relatedSections[0].title) : ['What is Scan Data?','How does Tier 4 work?','What is the onboarding timeline?']
     };
   }
 
