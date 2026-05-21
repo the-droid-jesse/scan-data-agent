@@ -2018,9 +2018,19 @@ function kbQuery(query) {
   }
 
   // ── No overview matched — check if scored results are relevant enough ─────────
-  // If nothing scored, or the best match is too weak, admit it and suggest AI mode.
+  const needsSynthesis = KB_SYNTHESIS_PATTERNS.some(p => p.test(query));
+  const aiHint = `\n\n💡 **Switch to AI Mode** (click the mode button in the header and add your Anthropic API key) to get a full answer — AI Mode uses this knowledge base plus Claude's own reasoning to handle detailed and comparison questions.`;
+
+  // Questions that require comparison/reasoning can't be answered by section lookup.
+  if (needsSynthesis) {
+    return {
+      html: renderMd(`That question requires comparing or reasoning across topics — Knowledge Base mode can surface relevant sections but can't synthesize a direct answer for you.\n\nExpand the sections below for the raw detail, or use **AI Mode** for a direct explanation.${aiHint}`),
+      fus: ['What is Scan Data?','How does Tier 4 work?','What is the onboarding timeline?','How do reimbursements work?']
+    };
+  }
+
+  // If nothing scored well enough, admit it rather than returning noise.
   if (!scored.length || scored[0].score < KB_MIN_SCORE) {
-    const aiHint = `\n\n💡 **For specific questions like this**, switch to **AI Mode** — click the mode button in the header and add your Anthropic API key. AI Mode uses the full knowledge base plus Claude's reasoning to answer detailed questions directly.`;
     return {
       html: renderMd(`I don't have a specific answer to that in my knowledge base.\n\nTry one of the topic buttons above, or rephrase your question around a specific program (Altria, RJR, Tier 4, onboarding, errors, etc.).${aiHint}`),
       fus: ['What is Scan Data?','How does Tier 4 work?','What is the onboarding timeline?','How do reimbursements work?']
