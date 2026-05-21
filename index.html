@@ -2244,6 +2244,7 @@ async function sendMessage() {
     const tid = addTyping();
     await new Promise(r => setTimeout(r, 200)); // tiny delay for UX feel
     removeTyping(tid);
+    _pendingAiQuery = text; // remember for re-run if user switches to AI mode
     const kbResult = kbQuery(text);
     addMessage('kb', kbResult, kbResult.fus);
     setLoading(false);
