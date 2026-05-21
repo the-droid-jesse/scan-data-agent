@@ -2069,11 +2069,9 @@ function kbQuery(query) {
     const secondNote = competitive[1]
       ? `\n\nAlso relevant: **${competitive[1].title}** — ${kbGetSummary(competitive[1].content)}`
       : '';
-    // If the top section's summary is thin and score is borderline, suggest AI mode
-    const aiNudge = top.score < 8
-      ? `\n\n💡 *Need more depth? Switch to AI Mode for a fuller answer.*`
-      : '';
-    summaryHtml = renderMd(`**${top.title}**\n\n${topSummary}${secondNote}${aiNudge}`);
+    // If the top section's summary is thin and score is borderline, offer AI mode upgrade
+    const aiNudge = top.score < 8 ? kbAiSwitchBtn() : '';
+    summaryHtml = renderMd(`**${top.title}**\n\n${topSummary}${secondNote}`) + aiNudge;
   } else {
     // Broad question — bullet overview of matched sections
     const intro = kbBuildIntro(query, competitive);
