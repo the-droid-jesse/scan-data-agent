@@ -2148,6 +2148,46 @@ function saveKey() {
   showChat();
 }
 
+// ── AI Upgrade Modal (inline switch from KB mode) ─────────────────────────────
+let _pendingAiQuery = null; // last KB question — re-run after switching to AI mode
+
+function switchToAiMode() {
+  document.getElementById('ai-modal-backdrop').style.display = 'block';
+  document.getElementById('ai-modal').style.display = 'block';
+  document.getElementById('ai-modal-err').textContent = '';
+  setTimeout(() => document.getElementById('ai-modal-key').focus(), 60);
+}
+
+function closeAiModal() {
+  document.getElementById('ai-modal-backdrop').style.display = 'none';
+  document.getElementById('ai-modal').style.display = 'none';
+  document.getElementById('ai-modal-err').textContent = '';
+}
+
+function saveKeyFromModal() {
+  const val = document.getElementById('ai-modal-key').value.trim();
+  const err = document.getElementById('ai-modal-err');
+  if (!val.startsWith('sk-ant-')) { err.textContent = 'Key should start with sk-ant-…'; return; }
+  apiKey = val; kbMode = false;
+  localStorage.setItem('par_scan_api_key', val);
+  localStorage.setItem('par_scan_mode', 'ai');
+  closeAiModal();
+  updateModeUI();
+  // Re-run the question that prompted the upgrade, seamlessly
+  if (_pendingAiQuery) {
+    const q = _pendingAiQuery;
+    _pendingAiQuery = null;
+    const inp = document.getElementById('user-input');
+    inp.value = q;
+    sendMessage();
+  }
+}
+
+// Returns an inline "Switch to AI Mode" button for KB responses
+function kbAiSwitchBtn() {
+  return `<button onclick="switchToAiMode()" style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:9px 18px;background:var(--par-1);color:#fff;border-radius:8px;font-size:.84rem;font-weight:700;cursor:pointer;border:none;font-family:var(--f);">🤖 Switch to AI Mode</button>`;
+}
+
 function resetKey() {
   localStorage.removeItem('par_scan_api_key');
   localStorage.setItem('par_scan_mode', 'kb');
