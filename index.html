@@ -866,6 +866,7 @@ function toggleCalc() {
   _calcOpen = !_calcOpen;
   document.getElementById('calc-panel').classList.toggle('collapsed', !_calcOpen);
   document.getElementById('calc-toggle-btn').classList.toggle('on', _calcOpen);
+  document.getElementById('calc-backdrop').classList.toggle('visible', _calcOpen);
   if (_calcOpen) updateCalc();
 }
 
