@@ -436,6 +436,81 @@ input[type=range]::-webkit-slider-thumb {
   letter-spacing: .04em; text-transform: uppercase;
 }
 .tier-t4 { background: rgba(255,87,25,.15); border: 1px solid rgba(255,87,25,.35); color: var(--par-4); }
+
+/* ── Calc backdrop (mobile only) ── */
+#calc-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 199;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 680px) {
+  html { font-size: 15px; }
+
+  /* Header — slim down, drop title & status */
+  header { padding: 0 10px; gap: 8px; height: 46px; }
+  .htitle, .hd, .status-pill { display: none; }
+  .hbtn { padding: 5px 10px; font-size: .72rem; }
+
+  /* Password & API cards */
+  .pw-card { padding: 28px 18px; margin: 16px; max-width: 100%; }
+  .api-card { padding: 24px 18px; }
+  #api-screen { padding: 16px; align-items: flex-start; padding-top: 10vh; }
+
+  /* Topics bar — horizontal scroll, no wrap */
+  .topics-bar { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 10px; gap: 6px; }
+  .topics-bar::-webkit-scrollbar { display: none; }
+  .topic-pill { font-size: .72rem; padding: 4px 12px; }
+
+  /* Messages */
+  #messages { padding: 10px; gap: 10px; }
+  .bubble { font-size: .85rem; padding: 9px 11px; }
+  .bubble table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+
+  /* Copy button always visible (no hover on mobile) */
+  .copy-btn { opacity: 1; font-size: .68rem; }
+
+  /* Follow-up chips */
+  .fu-chip { padding: 5px 10px; font-size: .75rem; }
+
+  /* KB expand */
+  .kb-expand-body { padding: 9px 10px; }
+  .kb-expand-body table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+
+  /* Input */
+  .input-area { padding: 8px 10px; }
+  .input-hint { display: none; }
+  #user-input { font-size: .85rem; }
+  .send-btn { width: 44px; height: 44px; font-size: 1.1rem; }
+
+  /* Calculator — bottom sheet instead of side panel */
+  .calc-panel {
+    position: fixed !important;
+    bottom: 0; left: 0; right: 0; top: auto !important;
+    width: 100% !important;
+    height: 78vh;
+    border-left: none; border-top: 1px solid var(--brd);
+    border-radius: 16px 16px 0 0;
+    z-index: 200;
+    transform: translateY(0);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 -8px 32px rgba(0,0,0,.14);
+    opacity: 1 !important;
+  }
+  .calc-panel.collapsed {
+    width: 100% !important;
+    opacity: 1 !important;
+    pointer-events: none;
+    transform: translateY(110%);
+  }
+  #calc-backdrop { display: block; opacity: 0; transition: opacity .28s; pointer-events: none; }
+  #calc-backdrop.visible { opacity: 1; pointer-events: auto; }
+
+  /* Welcome card */
+  .welcome { padding: 12px; }
+  .welcome h2 { font-size: .85rem; }
+  .w-chip { font-size: .75rem; padding: 6px 11px; }
+}
 .tier-t3 { background: rgba(140,159,255,.15); border: 1px solid rgba(140,159,255,.35); color: var(--par-2); }
 .tier-t12 { background: rgba(92,97,128,.15); border: 1px solid rgba(92,97,128,.35); color: var(--txt-m); }
 
@@ -508,6 +583,9 @@ input[type=range]::-webkit-slider-thumb {
     <div class="api-hint" style="margin-top:8px">KB Mode: instant answers from the embedded Scan Data knowledge base — no key, no cost, works everywhere.</div>
   </div>
 </div>
+
+<!-- ── Mobile calc backdrop ── -->
+<div id="calc-backdrop" onclick="toggleCalc()"></div>
 
 <!-- ── Chat Screen ── -->
 <div id="chat-screen">
