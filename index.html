@@ -1836,7 +1836,25 @@ PAR's support team handles triage and routing — the retailer doesn't need to k
     sectionKeys: ['COMMON ERRORS', 'MINIMUM TECHNICAL', 'TECHNICAL ARCH', 'RESUBMISSION']
   },
   {
-    detect: q => ['tier 4','tier4','daf','dsf','lfp','p+','personali','ddm','eaiv','accelerator','store fund','loyalty fund'].some(w => q.includes(w)),
+    detect: q => ['ddm','digital data metric','tracking id','adid','opco','activity log','p+ segment','p+ audience','p+ marketing','segment creation','build audience','create audience','audience workflow','how to set up ddm','how does ddm'].some(w => q.includes(w)),
+    intro: `The **DDM (Digital Data Metric)** file is Altria's monthly engagement report — it's the evidence that your digital P+ marketing actually happened, and it's required for Tier 4 DAF attribution.
+
+**Here's how the full workflow runs:**
+
+**Phase 1 — Segments → Audience**
+Altria provides static **P+ Segments** (lists of members by product preference). You wrap each segment in a **dynamic Audience** in OC Command Center so it updates automatically as new members qualify each month.
+
+**Phase 2 — Communication + Tracking ID**
+Every P+ campaign asset needs a **Tracking ID** (what Altria calls an ADID) set in OC's Design/Asset tab — with the toggle flipped ON. Format: \`[OPCO]-[TYPE]-[SEQ]\` (e.g., \`PM-EMAIL-001\`). If the toggle is off, those engagement events will not appear in the DDM file — this is the #1 mistake.
+
+**Phase 3 — PAR Submits DDM**
+At month end, PAR pulls all engagement events (opens, clicks, banner impressions) tagged with your Tracking IDs and generates the DDM file automatically. Submitted within 5 business days after the last Friday of each month.
+
+PAR handles file generation and submission — your team's only job is correct Tracking ID setup in OC before campaigns launch.`,
+    sectionKeys: ['DDM FILES', 'ALTRIA TIER 4', 'ALTRIA (AGDC)']
+  },
+  {
+    detect: q => ['tier 4','tier4','daf','dsf','lfp','p+','personali','eaiv','accelerator','store fund','loyalty fund'].some(w => q.includes(w)),
     intro: `Altria **Tier 4** is the highest certification level in the Altria program and unlocks three premium funding pools on top of the base transaction incentive:
 
 - **DSF (Digital Store Fund)**: $0.003/transaction + $20/site/month — available Tier 3+
@@ -1850,7 +1868,7 @@ PAR's support team handles triage and routing — the retailer doesn't need to k
 4. **ODA consent** — retailer data sharing agreement with Altria
 
 PAR handles all technical requirements. Expand below for the full Tier 4 math, qualification checklist, and program mechanics.`,
-    sectionKeys: ['ALTRIA TIER 4', 'ALTRIA (AGDC)', 'REIMBURSEMENT']
+    sectionKeys: ['ALTRIA TIER 4', 'DDM FILES', 'ALTRIA (AGDC)', 'REIMBURSEMENT']
   },
   {
     detect: q => ['different','differenti','better','advantage','why par','compare','vs ','versus','legacy','switch','competitor','why not','why choose','what sets','value prop','benefit'].some(w => q.includes(w)),
