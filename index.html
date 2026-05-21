@@ -1220,9 +1220,117 @@ Note: Tier 3 requires only P+ API (1 requirement). Tier 3 gives access to DSF an
 
 ---
 
-## TECHNICAL ARCHITECTURE
+## DDM FILES — DIGITAL DATA METRIC & P+ SEGMENTS
 
-**Summary:** PAR's ETL pipeline ingests TLog data (NAXML/MAXML XML format) via SFTP from NCR, Gilbarco, Verifone, and GK systems, normalizes to each manufacturer's required file format, and submits automatically. Retailer doesn't touch the files — PAR handles everything end-to-end.
+**Summary:** DDM (Digital Data Metric) is a monthly Altria reporting file required for Tier 4 certification. It logs member engagement with P+ digital marketing (email opens, banner views, push notifications). PAR generates and submits DDM files on the retailer's behalf. P+ Segments are Altria-provided static audience lists that must be wrapped in a dynamic Audience inside OC Command Center before they become actionable for campaigns.
+
+Keywords: DDM digital data metric P+ segment audience OC command center tracking ID ADID OPCO monthly reporting altria tier 4 marketing communication email banner push notification activity log member engagement segment creation workflow
+
+**What is a DDM File?**
+The Digital Data Metric (DDM) file is a monthly submission to Altria that records how P+ members engaged with your digital marketing communications. It's the evidence Altria uses to verify you're running compliant digital outreach — a core requirement for Tier 4 certification and DAF eligibility.
+
+PAR generates and submits DDM files automatically as part of the Tier 4 service. Retailers do not manually create DDM files.
+
+**DDM File Contents — Activity Log fields:**
+- **Tracking ID / ADID** — Unique identifier linking the communication back to Altria's P+ system. Called "Tracking ID" in OC Command Center; Altria refers to it as ADID.
+- **Member ID** — Loyalty member who received or interacted with the communication (no PII — hashed/tokenized)
+- **Communication type** — Email, in-app banner, push notification, SMS
+- **Engagement action** — Open, click, impression
+- **Timestamp** — Date/time of the engagement event
+- **Store/site identifier** — Which location the member is associated with
+
+**Submission Deadline:** Within **5 business days after the last Friday of each month**. PAR submits on the retailer's behalf — no manual steps required from retailer.
+
+**Separate Submitter ID per Dealer/Jobber network.** Multi-banner retailers need a DDM Submitter ID scoped to each network (same pattern as scan data file submissions).
+
+---
+
+**P+ Segments — What They Are**
+
+Altria provides **P+ Segments** — static, pre-built lists of loyalty members that Altria has classified by product preference, purchase history, and geography. These segments are the targeting foundation for P+ digital marketing.
+
+**Key P+ Segment types:**
+| Segment Code | Description |
+|---|---|
+| \`Marl 0.25\` | Marlboro 0.25-pack-per-day smokers — highest value segment |
+| \`PMPVDUSA\` | PM USA cigarette product purchasers (broad) |
+| \`USSTCPVD\` | US Smokeless Tobacco Company purchasers |
+| \`HELIXPVD\` | Helix product purchasers (oral nicotine) |
+
+Segments update monthly based on Altria's data. PAR receives updated segment files and refreshes audiences in OC accordingly.
+
+---
+
+**3-Phase Workflow: Segments → Communications → Reporting**
+
+**Phase 1 — Identify Segments & Build Audience in OC Command Center**
+
+P+ Segments from Altria are static lists. To use them for active campaigns, they must be wrapped in a **dynamic Audience** inside OC Command Center:
+
+1. Navigate to **Audiences** in OC Command Center
+2. Create a new **Dynamic Audience**
+3. Under the audience definition, select **"Import from Segment"** and choose the Altria P+ segment file (e.g., \`PMPVDUSA\`)
+4. The dynamic audience continuously evaluates new loyalty members against the static segment criteria
+5. Save and name the audience clearly (e.g., "Altria P+ Marlboro High-Value — [Month]")
+
+**Why dynamic, not static?** Static audiences freeze at upload time. A dynamic audience keeps updating as new members qualify, so each month's campaign automatically picks up newly eligible P+ members without rebuilding the audience.
+
+**Phase 2 — Configure Communication & Set Tracking ID (ADID)**
+
+Every P+ digital communication must carry an **ADID (Altria Digital ID)** — referred to as **Tracking ID** in OC Command Center. This is what links the communication back to the DDM file and to the DAF/LFP incentive attribution.
+
+**ADID Format:** \`[OPCO]-[Type]-[Sequence]\`
+- **OPCO values:**
+  - \`PM\` = Philip Morris / Altria cigarettes
+  - \`USSTC\` = US Smokeless Tobacco Company
+  - \`HELIX\` = Helix Innovation
+- **Type:** \`EMAIL\`, \`BANNER\`, \`PUSH\`, \`SMS\`
+- **Sequence:** 3-digit zero-padded counter per period (e.g., \`001\`, \`002\`)
+- **Example:** \`PM-EMAIL-001\`, \`USSTC-BANNER-002\`, \`HELIX-PUSH-001\`
+
+**To set the Tracking ID in OC Command Center (Design/Asset tab):**
+1. Open the campaign or communication asset
+2. Go to the **Design / Asset tab**
+3. Locate the **Tracking ID** field
+4. Enter the ADID code exactly as Altria provided (case-sensitive)
+5. Enable the **Tracking ID toggle** — this is required; the toggle must be ON for DDM reporting to capture the engagement
+6. Save the asset and confirm the toggle status before publishing
+
+⚠️ **If the Tracking ID toggle is OFF, engagement events will NOT appear in the DDM file.** This is the #1 cause of missing DDM activity data.
+
+**Phase 3 — Send Communications & Report to Altria**
+
+1. Launch the campaign to the P+ Audience built in Phase 1
+2. OC tracks all engagement events (opens, clicks, banner impressions, push opens) and attaches the Tracking ID to each event
+3. At month end, PAR pulls the engagement activity log from OC
+4. PAR generates the DDM file from the activity log and submits to Altria within 5 business days of the last Friday of the month
+5. Altria processes DDM + scan data together for DAF/LFP attribution
+
+---
+
+**Common DDM Issues & Troubleshooting**
+
+| Issue | Cause | Fix |
+|---|---|---|
+| No activity in DDM file | Tracking ID toggle was OFF during campaign | Re-run communications with toggle ON; cannot retroactively recover events |
+| Wrong ADID format | Manual entry error or wrong OPCO code | Verify ADID with Altria P+ team before launch; check OC Design tab before publishing |
+| Members not receiving communications | Audience built as static instead of dynamic | Rebuild as dynamic audience linked to P+ segment |
+| Segment not finding members | Segment file not refreshed | Confirm latest monthly segment file was imported; re-trigger audience evaluation |
+| DDM submission rejected | Late submission (past 5 biz days after last Friday) | Contact Altria P+ team for late submission exception; prevent by scheduling PAR DDM run on 1st of month |
+| DAF not attributed despite DDM submission | Communication didn't target the correct P+ Audience, or ADID mismatch | Audit OC campaign → Audience link and verify ADID matches exactly what Altria expects |
+
+---
+
+**Sales Talking Points on DDM**
+
+- "PAR handles all DDM file generation and submission automatically — your team doesn't write a single file."
+- "The critical piece is setting up the Tracking ID correctly in OC. We train your marketing team on this once during onboarding."
+- "Without DDM, you cannot qualify for DAF — which is the biggest dollar amount in the Tier 4 stack. It's worth getting this right."
+- "Altria audits DDM regularly. If the ADID toggle was off, those months don't count — PAR's onboarding process checks this before go-live."
+
+---
+
+ (NAXML/MAXML XML format) via SFTP from NCR, Gilbarco, Verifone, and GK systems, normalizes to each manufacturer's required file format, and submits automatically. Retailer doesn't touch the files — PAR handles everything end-to-end.
 
 Keywords: POS switch change system NCR GK Gilbarco Verifone merchandise codes mapping pipeline ETL ingestion architecture how PAR processes switch pos mid month what happens switching
 
