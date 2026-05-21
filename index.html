@@ -1718,16 +1718,36 @@ function kbTokenize(text) {
   return text.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(t => t.length > 2 && !STOP_WORDS.has(t));
 }
 
+// IDF cache — built once, reused. Tokens in >60% of sections are pure noise in this domain
+// (e.g. "scan", "data", "tobacco" appear everywhere and signal nothing specific).
+let _kbIdf = null;
+function getKbIdf() {
+  if (_kbIdf) return _kbIdf;
+  const freq = {};
+  for (const s of KB_SECTIONS) {
+    const toks = new Set(kbTokenize(s.title + ' ' + s.content));
+    for (const t of toks) freq[t] = (freq[t] || 0) + 1;
+  }
+  _kbIdf = freq;
+  return _kbIdf;
+}
+
 function kbScore(section, query) {
   const qToks = kbTokenize(query);
+  const idf   = getKbIdf();
+  const N     = KB_SECTIONS.length;
   const sText = (section.title + ' ' + section.content).toLowerCase();
   let score = 0;
   for (const t of qToks) {
+    // Skip tokens that appear in more than 60% of sections — they carry no signal
+    if ((idf[t] || 0) / N > 0.60) continue;
     if (sText.includes(t)) score += 1;
     if (section.title.toLowerCase().includes(t)) score += 3;
   }
   for (let i = 0; i < qToks.length - 1; i++) {
-    if (sText.includes(qToks[i] + ' ' + qToks[i+1])) score += 4;
+    const t1 = qToks[i], t2 = qToks[i + 1];
+    if ((idf[t1] || 0) / N > 0.60 || (idf[t2] || 0) / N > 0.60) continue;
+    if (sText.includes(t1 + ' ' + t2)) score += 4;
   }
   return score;
 }
