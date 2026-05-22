@@ -2043,12 +2043,17 @@ function kbQuery(query) {
     }
   }
 
-  // ── No overview matched — check if scored results are relevant enough ─────────
+  // ── No overview matched — apply dynamic threshold + synthesis detection ──────
+  // Short/specific queries (1-2 meaningful tokens) need only score ≥ 1.
+  // Longer queries require progressively stronger signal.
+  const effCount = kbEffCount(query);
+  const dynMin   = kbDynMinScore(effCount);
+
   const needsSynthesis = KB_SYNTHESIS_PATTERNS.some(p => p.test(query));
 
-  // Questions that require comparison/reasoning can't be answered by section lookup.
+  // Comparison/synthesis questions: KB lookup can surface sections but can't reason.
   if (needsSynthesis) {
-    const relatedSections = scored.filter(s => s.score >= KB_MIN_SCORE).slice(0, 4);
+    const relatedSections = scored.filter(s => s.score >= Math.min(dynMin, 3)).slice(0, 4);
     const detailBlocks = relatedSections.length ? buildDetailBlocks(relatedSections) : '';
     const relatedNote = relatedSections.length
       ? `\n\nHere are the most relevant knowledge base sections — expand to find the pieces you need:`
@@ -2059,8 +2064,8 @@ function kbQuery(query) {
     };
   }
 
-  // If nothing scored well enough, admit it rather than returning noise.
-  if (!scored.length || scored[0].score < KB_MIN_SCORE) {
+  // If nothing scored above the dynamic bar, admit it and offer AI mode.
+  if (!scored.length || scored[0].score < dynMin) {
     return {
       html: renderMd(`I don't have a specific answer to that in my knowledge base.\n\nTry one of the topic buttons above, or rephrase your question around a specific program (Altria, RJR, Tier 4, onboarding, errors, etc.).`) + kbAiSwitchBtn(),
       fus: ['What is Scan Data?','How does Tier 4 work?','What is the onboarding timeline?','How do reimbursements work?']
@@ -2070,7 +2075,8 @@ function kbQuery(query) {
   const top = scored[0];
 
   // ── Fallback: direct answer for focused queries, bullet list for broad ones ───
-  const minScore = Math.max(2, top.score * 0.35);
+  // Lower competitive floor to 1 so single-token queries still surface a section.
+  const minScore = Math.max(1, top.score * 0.35);
   const competitive = scored.filter(s => s.score >= minScore).slice(0, 6);
 
   let summaryHtml;
