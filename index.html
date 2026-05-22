@@ -2343,7 +2343,7 @@ function addMessage(role, payload, fus = []) {
   const copyBtn = !isUser ? `<button class="copy-btn" onclick="copyText(this)">Copy</button>` : '';
   const fuList  = (fus && fus.length) ? fus : [];
   let fuHtml = '';
-  if (fuList.length) fuHtml = `<div class="followups"><div class="fu-label">You might also ask:</div>${fuList.map(q=>`<button class="fu-chip" onclick="ask(${JSON.stringify(q)})">${esc(q)}</button>`).join('')}</div>`;
+  if (fuList.length) fuHtml = `<div class="followups"><div class="fu-label">You might also ask:</div>${fuList.map(q=>`<button class="fu-chip" onclick='ask(${JSON.stringify(q)})'>${esc(q)}</button>`).join('')}</div>`;
   const bubbleCls = isUser ? 'bubble user' : 'bubble ai';
   const bubbleStyle = isKb ? 'border-color:rgba(140,159,255,.2)' : '';
   d.innerHTML = `${av}<div class="${bubbleCls}"${bubbleStyle?' style="'+bubbleStyle+'"':''}>${copyBtn}${badge}${body}${fuHtml}</div>`;
