@@ -1747,11 +1747,31 @@ function getKbIdf() {
   return _kbIdf;
 }
 
+// Entity routing table — when a query contains these terms, the named section gets +15 bonus.
+// This prevents coincidental title-word matches (e.g. "rule" → "GOLDEN RULE") from
+// outranking the correct authoritative section for a specific entity.
+const KB_ENTITY_ROUTES = [
+  { terms: ['agdc','agdcnow','altria file','altria submission','altria format','altria cap','altria rule','altria deadline','altria naming','altria contact','lfp report','lfp file','submission cap'], fragment: 'ALTRIA (AGDC)' },
+  { terms: ['circana','rmsc','reynolds','rjr file','rjr format','rjr submission','rjr deadline','rjr contact','rjr field','34 field'], fragment: 'RJR (CIRCANA)' },
+  { terms: ['msa','liggett','vector group','msa file','msa reject','msa format'], fragment: 'MSA SCAN' },
+  { terms: ['sfpp','pmi sfpp','iqos','pmi file','pmi format','pmi submission'], fragment: 'PMI (SFPP)' },
+  { terms: ['juul labs','juul data','juul submission','juul contact','juul file','juul format','juul onboard'], fragment: 'JUUL SCAN' },
+  { terms: ['jbf','joint business fund','joint funding','external id','rjr code'], fragment: 'JBF' },
+  { terms: ['ddm','digital data metric','adid','tracking id','p+ segment','p+ audience','p+ marketing','opco','activity log'], fragment: 'DDM FILES' },
+  { terms: ['coco','dealer jobber','jobber onboard','dealer onboard','submitter id'], fragment: 'COCO VS' },
+  { terms: ['pspc','naxml','maxml','tlog','axonet','technical architecture','minimum technical','file format requirement'], fragment: 'MINIMUM TECHNICAL' },
+  { terms: ['common error','no election','missing store','store coverage','escalation path','error fix','troubleshoot'], fragment: 'COMMON ERRORS' },
+  { terms: ['resubmission','resubmit','missed rebate','retroactive','prior period'], fragment: 'RESUBMISSION' },
+  { terms: ['golden rule','manufacturer rule','data broker rule','all manufacturer','every manufacturer','manufacturer list','which manufacturer'], fragment: 'MANUFACTURERS' },
+];
+
 function kbScore(section, query) {
   const qToks = kbTokenize(query);
   const idf   = getKbIdf();
   const N     = KB_SECTIONS.length;
   const sText = (section.title + ' ' + section.content).toLowerCase();
+  const sTitle = section.title.toUpperCase();
+  const qLower  = query.toLowerCase();
   let score = 0;
   for (const t of qToks) {
     // Skip tokens that appear in more than 60% of sections — they carry no signal
@@ -1763,6 +1783,14 @@ function kbScore(section, query) {
     const t1 = qToks[i], t2 = qToks[i + 1];
     if ((idf[t1] || 0) / N > 0.60 || (idf[t2] || 0) / N > 0.60) continue;
     if (sText.includes(t1 + ' ' + t2)) score += 4;
+  }
+  // Entity routing — named-entity terms in the query get a strong boost toward the
+  // authoritative section, overriding coincidental title-word matches elsewhere.
+  for (const route of KB_ENTITY_ROUTES) {
+    if (sTitle.includes(route.fragment) && route.terms.some(t => qLower.includes(t))) {
+      score += 15;
+      break;
+    }
   }
   return score;
 }
